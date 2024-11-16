@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serde.MsgPack.Tests", "tests\Serde.MsgPack.Tests.csproj", "{FC991F6B-67EA-4C86-9BDE-70914D06BA5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Serde.MsgPack", "src\Serde.MsgPack.csproj", "{C765AC6A-ACF0-415E-BA83-E05D8CFDF5D9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC991F6B-67EA-4C86-9BDE-70914D06BA5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC991F6B-67EA-4C86-9BDE-70914D06BA5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC991F6B-67EA-4C86-9BDE-70914D06BA5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC991F6B-67EA-4C86-9BDE-70914D06BA5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C765AC6A-ACF0-415E-BA83-E05D8CFDF5D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C765AC6A-ACF0-415E-BA83-E05D8CFDF5D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C765AC6A-ACF0-415E-BA83-E05D8CFDF5D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C765AC6A-ACF0-415E-BA83-E05D8CFDF5D9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
