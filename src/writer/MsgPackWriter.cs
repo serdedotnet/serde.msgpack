@@ -1,4 +1,5 @@
 
+using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Text;
 
@@ -77,8 +78,8 @@ internal sealed partial class MsgPackWriter(ScratchBuffer outBuffer) : ISerializ
 
     void ISerializer.SerializeEnumValue<T, U>(ISerdeInfo typeInfo, int index, T value, U serialize)
     {
-        // Serialize the underlying value
-        serialize.Serialize(value, this);
+        // Serialize the index of the enum member
+        SerializeI64(index);
     }
 
     void ISerializer.SerializeFloat(float f)
@@ -260,13 +261,16 @@ internal sealed partial class MsgPackWriter(ScratchBuffer outBuffer) : ISerializ
     private void WriteBigEndian(short value) => WriteBigEndian((ushort)value);
     private void WriteBigEndian(int value) => WriteBigEndian((uint)value);
     private void WriteBigEndian(long value) => WriteBigEndian((ulong)value);
+    private void WriteBigEndian(float f)
+    {
+        Span<byte> bytes = stackalloc byte[4];
+        BinaryPrimitives.WriteSingleBigEndian(bytes, f);
+        _out.AddRange(bytes);
+    }
     private void WriteBigEndian(double d)
     {
-        var bytes = BitConverter.GetBytes(d);
-        if (BitConverter.IsLittleEndian)
-        {
-            Array.Reverse(bytes);
-        }
+        Span<byte> bytes = stackalloc byte[8];
+        BinaryPrimitives.WriteDoubleBigEndian(bytes, d);
         _out.AddRange(bytes);
     }
 }

@@ -4,10 +4,11 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageVersion>0.1.0-preview1</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serde" Version="0.7.0" />
+    <PackageReference Include="Serde" Version="0.8.0-preview1" />
   </ItemGroup>
 
 </Project>
