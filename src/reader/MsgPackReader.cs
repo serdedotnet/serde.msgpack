@@ -170,7 +170,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         }
     }
 
-    decimal IDeserializer.ReadDecimal()
+    public decimal ReadDecimal()
     {
         throw new NotImplementedException();
     }
@@ -250,7 +250,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         return false;
     }
 
-    short IDeserializer.ReadI16()
+    public short ReadI16()
     {
         if (!TryReadI16(out var i16))
         {
@@ -335,7 +335,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         return proxy.Deserialize(this);
     }
 
-    sbyte IDeserializer.ReadSByte()
+    public sbyte ReadSByte()
     {
         if (!TryReadSbyte(out var sb))
         {
@@ -490,7 +490,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         return false;
     }
 
-    uint IDeserializer.ReadU32()
+    public uint ReadU32()
     {
         if (!TryReadU32(out var u32))
         {
@@ -499,7 +499,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         return u32;
     }
 
-    ulong IDeserializer.ReadU64()
+    public ulong ReadU64()
     {
         if (!TryReadU64(out var u64))
         {

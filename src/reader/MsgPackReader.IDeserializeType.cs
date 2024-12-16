@@ -13,61 +13,32 @@ partial class MsgPackReader<TReader>
 
         char IDeserializeType.ReadChar(int index) => (char)deserializer.ReadU16();
 
-        decimal IDeserializeType.ReadDecimal(int index)
-        {
-            throw new NotImplementedException();
-        }
+        decimal IDeserializeType.ReadDecimal(int index) => deserializer.ReadDecimal();
+        double IDeserializeType.ReadDouble(int index) => deserializer.ReadDouble();
 
-        double IDeserializeType.ReadDouble(int index)
-        {
-            throw new NotImplementedException();
-        }
+        float IDeserializeType.ReadFloat(int index) => deserializer.ReadFloat();
 
-        float IDeserializeType.ReadFloat(int index)
-        {
-            throw new NotImplementedException();
-        }
-
-        short IDeserializeType.ReadI16(int index)
-        {
-            throw new NotImplementedException();
-        }
+        short IDeserializeType.ReadI16(int index) => deserializer.ReadI16();
 
         int IDeserializeType.ReadI32(int index) => deserializer.ReadI32();
 
         long IDeserializeType.ReadI64(int index) => deserializer.ReadI64();
 
-        sbyte IDeserializeType.ReadSByte(int index)
-        {
-            throw new NotImplementedException();
-        }
+        sbyte IDeserializeType.ReadSByte(int index) => deserializer.ReadSByte();
 
         string IDeserializeType.ReadString(int index) => deserializer.ReadString();
 
-        ushort IDeserializeType.ReadU16(int index)
-        {
-            throw new NotImplementedException();
-        }
+        ushort IDeserializeType.ReadU16(int index) => deserializer.ReadU16();
 
-        uint IDeserializeType.ReadU32(int index)
-        {
-            throw new NotImplementedException();
-        }
+        uint IDeserializeType.ReadU32(int index) => deserializer.ReadU32();
 
-        ulong IDeserializeType.ReadU64(int index)
-        {
-            throw new NotImplementedException();
-        }
+        ulong IDeserializeType.ReadU64(int index) => deserializer.ReadU64();
 
         T IDeserializeType.ReadValue<T>(int index, Serde.IDeserialize<T> deserialize)
-        {
-            throw new NotImplementedException();
-        }
+             => deserialize.Deserialize(deserializer);
 
         void IDeserializeType.SkipValue()
-        {
-            throw new NotImplementedException();
-        }
+            => throw new NotImplementedException();
 
         int IDeserializeType.TryReadIndex(ISerdeInfo map, out string? errorName)
         {
