@@ -5,54 +5,61 @@ namespace Serde.MsgPack.Tests;
 /// <summary>
 /// Compares the output of the MsgPackSerializer with the output of the MessagePackSerializer.
 /// </summary>
-public partial class MessagePackOracleTests
+public partial class SerializeOracleTests
 {
+    [Fact]
+    public void TestByte()
+    {
+        AssertMsgPackEqual((byte)42, ByteProxy.Instance);
+        AssertMsgPackEqual((byte)0xf0, ByteProxy.Instance);
+    }
+
     [Fact]
     public void TestChar()
     {
-        AssertMsgPackEqual('c', new CharWrap());
+        AssertMsgPackEqual('c', CharProxy.Instance);
     }
 
     [Fact]
     public void TestByteSizedUInt()
     {
-        AssertMsgPackEqual(42u, new UInt32Wrap());
+        AssertMsgPackEqual(42u, UInt32Proxy.Instance);
     }
 
     [Fact]
     public void TestPositiveByteSizedInt()
     {
-        AssertMsgPackEqual(42, new Int32Wrap());
+        AssertMsgPackEqual(42, Int32Proxy.Instance);
     }
 
     [Fact]
     public void TestNegativeByteSizedInt()
     {
-        AssertMsgPackEqual(-42, new Int32Wrap());
+        AssertMsgPackEqual(-42, Int32Proxy.Instance);
     }
 
     [Fact]
     public void TestPositiveUInt16()
     {
-        AssertMsgPackEqual((ushort)0x1000, new UInt16Wrap());
+        AssertMsgPackEqual((ushort)0x1000, UInt16Proxy.Instance);
     }
 
     [Fact]
     public void TestNegativeInt16()
     {
-        AssertMsgPackEqual((short)-0x1000, new Int16Wrap());
+        AssertMsgPackEqual((short)-0x1000, Int16Proxy.Instance);
     }
 
     [Fact]
     public void TestString()
     {
-        AssertMsgPackEqual("hello", new StringWrap());
+        AssertMsgPackEqual("hello", StringProxy.Instance);
     }
 
     [Fact]
     public void TestNullableString()
     {
-        AssertMsgPackEqual((string?)null, new NullableRefWrap.SerializeImpl<string, StringWrap>());
+        AssertMsgPackEqual((string?)null, NullableRefProxy.Serialize<string, StringProxy>.Instance);
     }
 
     [GenerateSerialize]
@@ -64,9 +71,9 @@ public partial class MessagePackOracleTests
     [Fact]
     public void TestByteEnum()
     {
-        AssertMsgPackEqual(ByteEnum.A, new ByteEnumWrap());
-        AssertMsgPackEqual(ByteEnum.B, new ByteEnumWrap());
-        AssertMsgPackEqual(ByteEnum.C, new ByteEnumWrap());
+        AssertMsgPackEqual(ByteEnum.A, ByteEnumProxy.Instance);
+        AssertMsgPackEqual(ByteEnum.B, ByteEnumProxy.Instance);
+        AssertMsgPackEqual(ByteEnum.C, ByteEnumProxy.Instance);
     }
 
     [GenerateSerialize]
@@ -78,9 +85,9 @@ public partial class MessagePackOracleTests
     [Fact]
     public void TestIntEnum()
     {
-        AssertMsgPackEqual(IntEnum.A, new IntEnumWrap());
-        AssertMsgPackEqual(IntEnum.B, new IntEnumWrap());
-        AssertMsgPackEqual(IntEnum.C, new IntEnumWrap());
+        AssertMsgPackEqual(IntEnum.A, IntEnumProxy.Instance);
+        AssertMsgPackEqual(IntEnum.B, IntEnumProxy.Instance);
+        AssertMsgPackEqual(IntEnum.C, IntEnumProxy.Instance);
     }
 
     [GenerateSerialize]
@@ -123,37 +130,37 @@ public partial class MessagePackOracleTests
     [Fact]
     public void TestDouble()
     {
-        AssertMsgPackEqual(3.14, new DoubleWrap());
-        AssertMsgPackEqual(double.NaN, new DoubleWrap());
-        AssertMsgPackEqual(double.PositiveInfinity, new DoubleWrap());
+        AssertMsgPackEqual(3.14, DoubleProxy.Instance);
+        AssertMsgPackEqual(double.NaN, DoubleProxy.Instance);
+        AssertMsgPackEqual(double.PositiveInfinity, DoubleProxy.Instance);
     }
 
     [Fact]
     public void TestArray()
     {
-        AssertMsgPackEqual(new[] { 1, 2, 3 }, new ArrayWrap.SerializeImpl<int, Int32Wrap>());
-        AssertMsgPackEqual(new[] { "a", "b", "c" }, new ArrayWrap.SerializeImpl<string, StringWrap>());
+        AssertMsgPackEqual(new[] { 1, 2, 3 }, ArrayProxy.Serialize<int, Int32Proxy>.Instance);
+        AssertMsgPackEqual(new[] { "a", "b", "c" }, ArrayProxy.Serialize<string, StringProxy>.Instance);
         AssertMsgPackEqual(new[] { new Point { X = 1, Y = 2 }, new Point { X = 3, Y = 4 } },
-            new ArrayWrap.SerializeImpl<Point, IdWrap<Point>>());
+            ArrayProxy.Serialize<Point, Point>.Instance);
     }
 
     [Fact]
     public void TestDictionary()
     {
         AssertMsgPackEqual(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } },
-            new DictWrap.SerializeImpl<string, StringWrap, int, Int32Wrap>());
+            DictProxy.Serialize<string, int, StringProxy, Int32Proxy>.Instance);
         AssertMsgPackEqual(new Dictionary<int, string> { { 1, "a" }, { 2, "b" } },
-            new DictWrap.SerializeImpl<int, Int32Wrap, string, StringWrap>());
+            DictProxy.Serialize<int, string, Int32Proxy, StringProxy>.Instance);
         AssertMsgPackEqual(new Dictionary<Point, string> { { new Point { X = 1, Y = 2 }, "a" }, { new Point { X = 3, Y = 4 }, "b" } },
-            new DictWrap.SerializeImpl<Point, IdWrap<Point>, string, StringWrap>());
+            DictProxy.Serialize<Point, string, Point, StringProxy>.Instance);
     }
 
     [Fact]
     public void TestFloat()
     {
-        AssertMsgPackEqual(3.14f, new SingleWrap());
-        AssertMsgPackEqual(float.NaN, new SingleWrap());
-        AssertMsgPackEqual(float.PositiveInfinity, new SingleWrap());
+        AssertMsgPackEqual(3.14f, SingleProxy.Instance);
+        AssertMsgPackEqual(float.NaN, SingleProxy.Instance);
+        AssertMsgPackEqual(float.PositiveInfinity, SingleProxy.Instance);
     }
 
     private void AssertMsgPackEqual<T, U>(T value, U proxy)
@@ -164,7 +171,7 @@ public partial class MessagePackOracleTests
         Assert.Equal(expected, actual);
     }
 
-    private void AssertMsgPackEqual<T>(T value) where T : ISerialize<T>
-        => AssertMsgPackEqual(value, value);
+    private void AssertMsgPackEqual<T>(T value) where T : ISerializeProvider<T>
+        => AssertMsgPackEqual(value, T.SerializeInstance);
 
 }

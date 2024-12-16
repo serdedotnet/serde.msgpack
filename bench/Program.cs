@@ -1,37 +1,35 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System;
-using System.Security.Cryptography;
-using BenchmarkDotNet.Attributes;
+﻿using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
+using Benchmarks;
+using MessagePack;
 
-namespace MsgPack.Benchmarks;
+var msg1 = MessagePackSerializer.Serialize(Location.Sample);
+var msg2 = Serde.MsgPack.MsgPackSerializer.Serialize(Location.Sample);
 
-public class MessagePackUnit
+if (!msg1.SequenceEqual(msg2))
 {
-    private const int N = 10000;
-    private readonly byte[] data;
-
-    private readonly SHA256 sha256 = SHA256.Create();
-    private readonly MD5 md5 = MD5.Create();
-
-    public MessagePackUnit()
-    {
-        data = new byte[N];
-        new Random(42).NextBytes(data);
-    }
-
-    [Benchmark]
-    public byte[] Sha256() => sha256.ComputeHash(data);
-
-    [Benchmark]
-    public byte[] Md5() => md5.ComputeHash(data);
+    Console.WriteLine(string.Join(", ", msg1));
+    Console.WriteLine(string.Join(", ", msg2));
+    throw new InvalidOperationException("bytes do not match");
 }
 
-public class Program
+var loc1 = MessagePackSerializer.Deserialize<Location>(msg1);
+var loc2 = Serde.MsgPack.MsgPackSerializer.Deserialize<Location, LocationWrap>(msg1, LocationWrap.Instance);
+
+Console.WriteLine("Checking correctness of serialization: " + (loc1 == loc2));
+if (loc1 != loc2)
 {
-    public static void Main(string[] args)
-    {
-        var summary = BenchmarkRunner.Run<MessagePackUnit>();
-    }
+    throw new InvalidOperationException($"""
+Serialization is not correct
+STJ:
+{loc1}
+
+Serde:
+{loc2}
+""");
 }
 
+var config = DefaultConfig.Instance.AddDiagnoser(MemoryDiagnoser.Default);
+var summary = BenchmarkSwitcher.FromAssembly(typeof(DeserializeFromString<,>).Assembly)
+    .Run(args, config);
