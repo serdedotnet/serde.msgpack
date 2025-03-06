@@ -7,18 +7,11 @@ public static class MsgPackSerializer
 {
     public static byte[] Serialize<T>(T value)
         where T : ISerializeProvider<T>
-    {
-        using var buffer = new ScratchBuffer();
-        var writer = new MsgPackWriter(buffer);
-        var serializeObject = T.SerializeInstance;
-        serializeObject.Serialize(value, writer);
-        return buffer.Span.ToArray();
-    }
+        => Serialize(value, T.Instance);
 
-    public static byte[] Serialize<T, U>(T value, U proxy)
-        where U : ISerialize<T>
+    public static byte[] Serialize<T>(T value, ISerialize<T> proxy)
     {
-        using var buffer = new ScratchBuffer();
+        using var buffer = new ScratchBuffer(1024);
         var writer = new MsgPackWriter(buffer);
         proxy.Serialize(value, writer);
         return buffer.Span.ToArray();
@@ -30,5 +23,12 @@ public static class MsgPackSerializer
         var byteBuffer = new ArrayBufReader(bytes);
         using var reader = new MsgPackReader<ArrayBufReader>(byteBuffer);
         return proxy.Deserialize(reader);
+    }
+    public static T Deserialize<T>(byte[] bytes)
+        where T : IDeserializeProvider<T>
+    {
+        var byteBuffer = new ArrayBufReader(bytes);
+        using var reader = new MsgPackReader<ArrayBufReader>(byteBuffer);
+        return T.Instance.Deserialize(reader);
     }
 }
