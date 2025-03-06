@@ -5,7 +5,7 @@ partial class MsgPackReader<TReader>
 {
     private struct DeserializeType(MsgPackReader<TReader> deserializer) : IDeserializeType
     {
-        private int _index;
+        private int _count;
 
         bool IDeserializeType.ReadBool(int index) => deserializer.ReadBool();
 
@@ -34,7 +34,7 @@ partial class MsgPackReader<TReader>
 
         ulong IDeserializeType.ReadU64(int index) => deserializer.ReadU64();
 
-        T IDeserializeType.ReadValue<T>(int index, Serde.IDeserialize<T> deserialize)
+        T IDeserializeType.ReadValue<T, D>(int index, D deserialize)
              => deserialize.Deserialize(deserializer);
 
         void IDeserializeType.SkipValue()
@@ -45,14 +45,17 @@ partial class MsgPackReader<TReader>
             // Two options: we have a struct/class, or an enum
             if (map.Kind == InfoKind.CustomType)
             {
-                // custom types always serialize in order, so just increment the index counter
-                if (_index >= map.FieldCount)
+                if (_count >= map.FieldCount)
                 {
                     errorName = null;
                     return IDeserializeType.EndOfType;
                 }
-                errorName = null;
-                return _index++;
+                // custom types are serialized like maps with field names as keys
+                var span = deserializer.ReadUtf8Span();
+                int index = map.TryGetIndex(span);
+                errorName = index == IDeserializeType.IndexNotFound ? span.ToString() : null;
+                _count++;
+                return index;
             }
             else if (map.Kind == InfoKind.Enum)
             {

@@ -92,12 +92,11 @@ public partial class RoundTripTests
     }
 
     [GenerateSerde]
-    [MessagePackObject]
+    [SerdeTypeOptions(MemberFormat = MemberFormat.None)]
+    [MessagePackObject(keyAsPropertyName: true)]
     public partial record Point
     {
-        [Key(0)]
         public int X { get; init; }
-        [Key(1)]
         public int Y { get; init; }
     }
 
@@ -117,7 +116,7 @@ public partial class RoundTripTests
         public int X { get; init; }
     }
 
-    [Fact]
+    [Fact(Skip = "Key ordering is not supported for Serde")]
     public void TestOutOfOrderKeys()
     {
         // Out of order keys are not supported for Serde

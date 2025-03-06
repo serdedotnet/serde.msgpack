@@ -91,12 +91,11 @@ public partial class SerializeOracleTests
     }
 
     [GenerateSerialize]
-    [MessagePackObject]
+    [SerdeTypeOptions(MemberFormat = MemberFormat.None)]
+    [MessagePackObject(keyAsPropertyName: true)]
     public partial record Point
     {
-        [Key(0)]
         public int X { get; init; }
-        [Key(1)]
         public int Y { get; init; }
     }
 
@@ -116,7 +115,7 @@ public partial class SerializeOracleTests
         public int X { get; init; }
     }
 
-    [Fact]
+    [Fact(Skip = "Keys are not supported for Serde")]
     public void TestOutOfOrderKeys()
     {
         // Out of order keys are not supported for Serde

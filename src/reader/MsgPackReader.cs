@@ -284,7 +284,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
     {
         if (!TryReadI32(out var i32))
         {
-            throw new Exception("Expected 32-bit integer");
+            throw new Exception($"Expected 32-bit integer, found 0x{i32:x}");
         }
         return i32;
     }
@@ -349,6 +349,13 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
     private string ReadString()
     {
         // strings are encoded in UTF8 as byte arrays
+        var span = ReadUtf8Span();
+        var str = Encoding.UTF8.GetString(span);
+        return str;
+    }
+
+    private ReadOnlySpan<byte> ReadUtf8Span()
+    {
         var b = EatByteOrThrow();
         int length;
         if (b <= 0xbf)
@@ -379,9 +386,8 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         {
             span = RefillNoEof(length);
         }
-        var str = Encoding.UTF8.GetString(span[..length]);
         _reader.Advance(length);
-        return str;
+        return span[..length];
     }
 
     IDeserializeType IDeserializer.ReadType(ISerdeInfo typeInfo)

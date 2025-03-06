@@ -5,20 +5,27 @@ using System.Text;
 
 namespace Serde.MsgPack;
 
-internal sealed partial class MsgPackWriter(ScratchBuffer outBuffer) : ISerializer
+internal sealed partial class MsgPackWriter : ISerializer
 {
-    private readonly ScratchBuffer _out = outBuffer;
+    private readonly ScratchBuffer _out;
+    private readonly EnumSerializer _enumSerializer;
 
-    void ISerializer.SerializeBool(bool b)
+    public MsgPackWriter(ScratchBuffer scratch)
+    {
+        _out = scratch;
+        _enumSerializer = new EnumSerializer(this);
+    }
+
+    public void WriteBool(bool b)
     {
         _out.Add(b ? (byte)0xc3 : (byte)0xc2);
     }
 
-    void ISerializer.SerializeByte(byte b) => SerializeU64(b);
+    public void WriteByte(byte b) => WriteU64(b);
 
-    void ISerializer.SerializeChar(char c) => SerializeU64(c);
+    public void WriteChar(char c) => WriteU64(c);
 
-    ISerializeCollection ISerializer.SerializeCollection(ISerdeInfo typeInfo, int? length)
+    public ISerializeCollection WriteCollection(ISerdeInfo typeInfo, int? length)
     {
         if (length is null)
         {
@@ -43,20 +50,7 @@ internal sealed partial class MsgPackWriter(ScratchBuffer outBuffer) : ISerializ
         }
         else if (typeInfo.Kind == InfoKind.Dictionary)
         {
-            if (length <= 15)
-            {
-                _out.Add((byte)(0x80 | length));
-            }
-            else if (length <= 0xffff)
-            {
-                _out.Add(0xde);
-                WriteBigEndian((ushort)length);
-            }
-            else
-            {
-                _out.Add(0xdf);
-                WriteBigEndian((uint)length);
-            }
+            WriteMapLength(length);
         }
         else
         {
@@ -65,40 +59,52 @@ internal sealed partial class MsgPackWriter(ScratchBuffer outBuffer) : ISerializ
         return this;
     }
 
-    void ISerializer.SerializeDecimal(decimal d)
+    private void WriteMapLength(int? length)
+    {
+        if (length <= 15)
+        {
+            _out.Add((byte)(0x80 | length));
+        }
+        else if (length <= 0xffff)
+        {
+            _out.Add(0xde);
+            WriteBigEndian((ushort)length);
+        }
+        else
+        {
+            _out.Add(0xdf);
+            WriteBigEndian((uint)length);
+        }
+    }
+
+    public void WriteDecimal(decimal d)
     {
         throw new NotImplementedException();
     }
 
-    void ISerializer.SerializeDouble(double d)
+    public void WriteDouble(double d)
     {
         _out.Add(0xcb);
         WriteBigEndian(d);
     }
 
-    void ISerializer.SerializeEnumValue<T, U>(ISerdeInfo typeInfo, int index, T value, U serialize)
-    {
-        // Serialize the index of the enum member
-        SerializeI64(index);
-    }
-
-    void ISerializer.SerializeFloat(float f)
+    public void WriteFloat(float f)
     {
         _out.Add(0xca);
         WriteBigEndian(f);
     }
 
-    void ISerializer.SerializeI16(short i16) => SerializeI64(i16);
+    public void WriteI16(short i16) => WriteI64(i16);
 
-    void ISerializer.SerializeI32(int i32) => SerializeI64(i32);
+    public void WriteI32(int i32) => WriteI64(i32);
 
-    void ISerializer.SerializeI64(long i64) => SerializeI64(i64);
+    void ISerializer.WriteI64(long i64) => WriteI64(i64);
 
-    private void SerializeI64(long i64)
+    private void WriteI64(long i64)
     {
         if (i64 >= 0)
         {
-            SerializeU64((ulong)i64);
+            WriteU64((ulong)i64);
         }
         else if (i64 >= -32)
         {
@@ -125,84 +131,67 @@ internal sealed partial class MsgPackWriter(ScratchBuffer outBuffer) : ISerializ
             WriteBigEndian(i64);
         }
     }
-
-    void ISerializer.SerializeNull()
+    public void WriteNull()
     {
         _out.Add(0xc0);
     }
 
-    void ISerializer.SerializeSByte(sbyte b) => SerializeI64(b);
+    public void WriteSByte(sbyte b) => WriteI64(b);
 
-    void ISerializer.SerializeString(string s)
+    public void WriteString(string s)
     {
         var bytes = Encoding.UTF8.GetBytes(s);
-        if (bytes.Length <= 31)
+        WriteUtf8String(bytes);
+    }
+
+    private void WriteUtf8String(ReadOnlySpan<byte> str)
+    {
+        if (str.Length <= 31)
         {
-            _out.Add((byte)(0xa0 | bytes.Length));
+            _out.Add((byte)(0xa0 | str.Length));
         }
-        else if (bytes.Length <= 0xff)
+        else if (str.Length <= 0xff)
         {
             _out.Add(0xd9);
-            _out.Add((byte)bytes.Length);
+            _out.Add((byte)str.Length);
         }
-        else if (bytes.Length <= 0xffff)
+        else if (str.Length <= 0xffff)
         {
             _out.Add(0xda);
-            WriteBigEndian((ushort)bytes.Length);
+            WriteBigEndian((ushort)str.Length);
         }
         else
         {
             _out.Add(0xdb);
-            WriteBigEndian((uint)bytes.Length);
+            WriteBigEndian((uint)str.Length);
         }
-        foreach (var b in bytes)
+        foreach (var b in str)
         {
             _out.Add(b);
         }
     }
 
-    ISerializeType ISerializer.SerializeType(ISerdeInfo typeInfo)
+    public ISerializeType WriteType(ISerdeInfo typeInfo)
     {
-        // Check that, if the members are marked with [Key], they are in order.
-        // We do not support out-of-order keys.
-        for (int i = 0; i < typeInfo.FieldCount; i++)
+        if (typeInfo.Kind == InfoKind.CustomType)
         {
-            var attrs = typeInfo.GetFieldAttributes(i);
-            foreach (var attr in attrs)
-            {
-                if (attr.AttributeType.FullName == "MessagePack.KeyAttribute")
-                {
-                    if (attr.ConstructorArguments is [ { Value: int index } ] && index != i)
-                    {
-                        throw new InvalidOperationException($"Found member {typeInfo.GetFieldStringName(i)} declared at index {i} but marked with [Key({index})]. Key indices must match declaration order.");
-                    }
-                }
-            }
+            // Custom types are serialized as a map
+            WriteMapLength(typeInfo.FieldCount);
         }
-
-        // Write as an array, with the keys left implicit in the order
-        if (typeInfo.FieldCount <= 15)
+        else if (typeInfo.Kind == InfoKind.Enum)
         {
-            _out.Add((byte)(0x90 | typeInfo.FieldCount));
-        }
-        else if (typeInfo.FieldCount <= 0xffff)
-        {
-            _out.Add(0xdc);
-            WriteBigEndian((ushort)typeInfo.FieldCount);
-        }
-        else
-        {
-            _out.Add(0xdd);
-            WriteBigEndian((uint)typeInfo.FieldCount);
+            return _enumSerializer;
         }
         return this;
     }
 
-    void ISerializer.SerializeU16(ushort u16) => SerializeU64(u16);
+    public void WriteU16(ushort u16) => WriteU64(u16);
 
-    void ISerializer.SerializeU32(uint u32) => SerializeU64(u32);
+    public void WriteU32(uint u32) => WriteU64(u32);
 
-    private void SerializeU64(ulong u64)
+    void ISerializer.WriteU64(ulong u64) => WriteU64(u64);
+
+    private void WriteU64(ulong u64)
     {
         if (u64 <= 0x7f)
         {
@@ -229,8 +218,6 @@ internal sealed partial class MsgPackWriter(ScratchBuffer outBuffer) : ISerializ
             WriteBigEndian(u64);
         }
     }
-
-    void ISerializer.SerializeU64(ulong u64) => SerializeU64(u64);
 
     private void WriteBigEndian(ushort value)
     {

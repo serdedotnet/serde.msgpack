@@ -8,7 +8,7 @@ partial class MsgPackWriter : ISerializeCollection
         // No action needed, all collections are length-prefixed
     }
 
-    void ISerializeCollection.SerializeElement<T, U>(T value, U serialize)
+    void ISerializeCollection.WriteElement<T, U>(T value, U serialize)
     {
         serialize.Serialize(value, this);
     }
