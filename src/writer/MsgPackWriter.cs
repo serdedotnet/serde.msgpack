@@ -137,6 +137,43 @@ internal sealed partial class MsgPackWriter : ISerializer
         _out.Add(0xc0);
     }
 
+    public void WriteDateTimeOffset(DateTimeOffset dt)
+    {
+        WriteString(dt.ToString("O"));
+    }
+
+    public void WriteBytes(ReadOnlyMemory<byte> bytes)
+    {
+        byte code = bytes.Length switch
+        {
+            <= 0xff => 0xc4,
+            <= 0xffff => 0xc5,
+            _ => 0xc6
+        };
+        var prefixLen = code switch
+        {
+            0xc4 => 2,
+            0xc5 => 3,
+            _ => 5
+        };
+        var span = _out.GetAppendSpan(prefixLen + bytes.Length);
+        _out.Count += prefixLen + bytes.Length;
+        span[0] = code;
+        switch (prefixLen)
+        {
+            case 2:
+                span[1] = (byte)bytes.Length;
+                break;
+            case 3:
+                WriteBigEndian((ushort)bytes.Length);
+                break;
+            case 5:
+                WriteBigEndian((uint)bytes.Length);
+                break;
+        }
+        bytes.Span.CopyTo(span[prefixLen..]);
+    }
+
     public void WriteI8(sbyte b) => WriteI64(b);
 
     private static readonly Encoding _utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);

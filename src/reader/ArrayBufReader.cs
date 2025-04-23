@@ -15,6 +15,6 @@ internal struct ArrayBufReader(byte[] bytes) : IBufReader
 
     public bool FillBuffer(int fillCount)
     {
-        return false;
+        return _offset + fillCount <= _buffer.Length;
     }
 }

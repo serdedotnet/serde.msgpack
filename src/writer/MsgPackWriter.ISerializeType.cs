@@ -111,4 +111,16 @@ partial class MsgPackWriter : ITypeSerializer
         WritePropertyName(typeInfo, index);
         WriteNull();
     }
+
+    void ITypeSerializer.WriteDateTimeOffset(ISerdeInfo typeInfo, int index, DateTimeOffset dt)
+    {
+        WritePropertyName(typeInfo, index);
+        WriteDateTimeOffset(dt);
+    }
+
+    void ITypeSerializer.WriteBytes(ISerdeInfo typeInfo, int index, ReadOnlyMemory<byte> bytes)
+    {
+        WritePropertyName(typeInfo, index);
+        WriteBytes(bytes);
+    }
 }

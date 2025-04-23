@@ -1,4 +1,6 @@
 
+using System.Buffers;
+
 namespace Serde.MsgPack;
 
 partial class MsgPackReader<TReader>
@@ -6,7 +8,8 @@ partial class MsgPackReader<TReader>
     private struct DeserializeCollection(MsgPackReader<TReader> deserializer, bool isDict, int length) : ITypeDeserializer
     {
         private int _index;
-        int? ITypeDeserializer.SizeOpt => isDict switch {
+        int? ITypeDeserializer.SizeOpt => isDict switch
+        {
             true => length / 2,
             false => length,
         };
@@ -129,6 +132,19 @@ partial class MsgPackReader<TReader>
         void ITypeDeserializer.SkipValue(ISerdeInfo info, int index)
         {
             throw new NotImplementedException();
+        }
+
+        DateTimeOffset ITypeDeserializer.ReadDateTimeOffset(ISerdeInfo info, int index)
+        {
+            var next = deserializer.ReadDateTimeOffset();
+            _index++;
+            return next;
+        }
+
+        void ITypeDeserializer.ReadBytes(ISerdeInfo info, int index, IBufferWriter<byte> writer)
+        {
+            deserializer.ReadBytes(writer);
+            _index++;
         }
     }
 }

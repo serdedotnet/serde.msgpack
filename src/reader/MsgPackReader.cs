@@ -1,8 +1,10 @@
 
 
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Serde.IO;
@@ -347,6 +349,32 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var span = ReadUtf8Span();
         var str = Encoding.UTF8.GetString(span);
         return str;
+    }
+
+    public DateTimeOffset ReadDateTimeOffset()
+    {
+        return DateTime.Parse(ReadString(), styles: DateTimeStyles.RoundtripKind);
+    }
+
+    public void ReadBytes(IBufferWriter<byte> writer)
+    {
+        var b = EatByteOrThrow();
+        int length = b switch
+        {
+            0xc4 => EatByteOrThrow(),
+            0xc5 => ReadBigEndianU16(), // 16-bit length
+            0xc6 => checked((int)ReadBigEndianU32()), // 32-bit length
+            _ => throw new DeserializeException($"Expected bytes, got 0x{b:x}"),
+        };
+        if (!_reader.FillBuffer(length))
+        {
+            ThrowEof();
+        }
+        var inputSpan = _reader.Span[..length];
+        var outSpan = writer.GetSpan(length);
+        inputSpan.CopyTo(outSpan);
+        _reader.Advance(length);
+        writer.Advance(length);
     }
 
     private ReadOnlySpan<byte> ReadUtf8Span()

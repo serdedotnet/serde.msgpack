@@ -1,4 +1,6 @@
 
+using System.Buffers;
+
 namespace Serde.MsgPack;
 
 partial class MsgPackReader<TReader>
@@ -70,6 +72,14 @@ partial class MsgPackReader<TReader>
                 errorName = "Expected a custom type or enum, found: " + map.Kind;
                 return ITypeDeserializer.IndexNotFound;
             }
+        }
+
+        DateTimeOffset ITypeDeserializer.ReadDateTimeOffset(ISerdeInfo info, int index)
+            => deserializer.ReadDateTimeOffset();
+
+        void ITypeDeserializer.ReadBytes(ISerdeInfo info, int index, IBufferWriter<byte> writer)
+        {
+            deserializer.ReadBytes(writer);
         }
     }
 }
