@@ -15,7 +15,7 @@ if (!msg1.SequenceEqual(msg2))
 }
 
 var loc1 = MessagePackSerializer.Deserialize<Location>(msg1);
-var loc2 = Serde.MsgPack.MsgPackSerializer.Deserialize<Location, LocationWrap>(msg1, LocationWrap.Instance);
+var loc2 = Serde.MsgPack.MsgPackSerializer.Deserialize<Location>(msg1);
 
 Console.WriteLine("Checking correctness of serialization: " + (loc1 == loc2));
 if (loc1 != loc2)
@@ -31,5 +31,5 @@ Serde:
 }
 
 var config = DefaultConfig.Instance.AddDiagnoser(MemoryDiagnoser.Default);
-var summary = BenchmarkSwitcher.FromAssembly(typeof(DeserializeFromString<,>).Assembly)
+var summary = BenchmarkSwitcher.FromAssembly(typeof(DeserializeFromString<>).Assembly)
     .Run(args, config);

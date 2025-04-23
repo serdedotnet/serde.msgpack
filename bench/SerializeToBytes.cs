@@ -9,26 +9,26 @@ using Serde;
 namespace Benchmarks
 {
     [GenericTypeArguments(typeof(Location))]
-    public class DeserializeFromString<T>
-        where T : Serde.IDeserializeProvider<T>
+    public class SerializeToBytes<T>
+        where T : Serde.ISerializeProvider<T>
     {
-        private byte[] value = null!;
+        private T value = default!;
 
-        private readonly IDeserialize<T> _proxy = T.Instance;
+        private readonly ISerialize<T> _proxy = T.Instance;
 
         [GlobalSetup]
         public void Setup()
         {
-            value = DataGenerator.GenerateDeserialize<T>();
+            value = DataGenerator.GenerateSerialize<T>();
         }
 
         [Benchmark]
-        public T? MessagePack()
+        public byte[] MessagePack()
         {
-            return MessagePackSerializer.Deserialize<T>(value);
+            return MessagePackSerializer.Serialize(value);
         }
 
         [Benchmark]
-        public T SerdeMsgPack() => Serde.MsgPack.MsgPackSerializer.Deserialize<T, IDeserialize<T>>(value, _proxy);
+        public byte[] SerdeMsgPack() => Serde.MsgPack.MsgPackSerializer.Serialize(value, _proxy);
     }
 }

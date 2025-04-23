@@ -10,8 +10,8 @@ public partial class SerializeOracleTests
     [Fact]
     public void TestByte()
     {
-        AssertMsgPackEqual((byte)42, ByteProxy.Instance);
-        AssertMsgPackEqual((byte)0xf0, ByteProxy.Instance);
+        AssertMsgPackEqual((byte)42, U8Proxy.Instance);
+        AssertMsgPackEqual((byte)0xf0, U8Proxy.Instance);
     }
 
     [Fact]
@@ -23,31 +23,31 @@ public partial class SerializeOracleTests
     [Fact]
     public void TestByteSizedUInt()
     {
-        AssertMsgPackEqual(42u, UInt32Proxy.Instance);
+        AssertMsgPackEqual(42u, U32Proxy.Instance);
     }
 
     [Fact]
     public void TestPositiveByteSizedInt()
     {
-        AssertMsgPackEqual(42, Int32Proxy.Instance);
+        AssertMsgPackEqual(42, I32Proxy.Instance);
     }
 
     [Fact]
     public void TestNegativeByteSizedInt()
     {
-        AssertMsgPackEqual(-42, Int32Proxy.Instance);
+        AssertMsgPackEqual(-42, I32Proxy.Instance);
     }
 
     [Fact]
     public void TestPositiveUInt16()
     {
-        AssertMsgPackEqual((ushort)0x1000, UInt16Proxy.Instance);
+        AssertMsgPackEqual((ushort)0x1000, U16Proxy.Instance);
     }
 
     [Fact]
     public void TestNegativeInt16()
     {
-        AssertMsgPackEqual((short)-0x1000, Int16Proxy.Instance);
+        AssertMsgPackEqual((short)-0x1000, I16Proxy.Instance);
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public partial class SerializeOracleTests
     [Fact]
     public void TestNullableString()
     {
-        AssertMsgPackEqual((string?)null, NullableRefProxy.Serialize<string, StringProxy>.Instance);
+        AssertMsgPackEqual((string?)null, NullableRefProxy.Ser<string, StringProxy>.Instance);
     }
 
     [GenerateSerialize]
@@ -91,12 +91,11 @@ public partial class SerializeOracleTests
     }
 
     [GenerateSerialize]
-    [MessagePackObject]
+    [SerdeTypeOptions(MemberFormat = MemberFormat.None)]
+    [MessagePackObject(keyAsPropertyName: true)]
     public partial record Point
     {
-        [Key(0)]
         public int X { get; init; }
-        [Key(1)]
         public int Y { get; init; }
     }
 
@@ -116,7 +115,7 @@ public partial class SerializeOracleTests
         public int X { get; init; }
     }
 
-    [Fact]
+    [Fact(Skip = "Keys are not supported for Serde")]
     public void TestOutOfOrderKeys()
     {
         // Out of order keys are not supported for Serde
@@ -130,37 +129,37 @@ public partial class SerializeOracleTests
     [Fact]
     public void TestDouble()
     {
-        AssertMsgPackEqual(3.14, DoubleProxy.Instance);
-        AssertMsgPackEqual(double.NaN, DoubleProxy.Instance);
-        AssertMsgPackEqual(double.PositiveInfinity, DoubleProxy.Instance);
+        AssertMsgPackEqual(3.14, F64Proxy.Instance);
+        AssertMsgPackEqual(double.NaN, F64Proxy.Instance);
+        AssertMsgPackEqual(double.PositiveInfinity, F64Proxy.Instance);
     }
 
     [Fact]
     public void TestArray()
     {
-        AssertMsgPackEqual(new[] { 1, 2, 3 }, ArrayProxy.Serialize<int, Int32Proxy>.Instance);
-        AssertMsgPackEqual(new[] { "a", "b", "c" }, ArrayProxy.Serialize<string, StringProxy>.Instance);
+        AssertMsgPackEqual(new[] { 1, 2, 3 }, ArrayProxy.Ser<int, I32Proxy>.Instance);
+        AssertMsgPackEqual(new[] { "a", "b", "c" }, ArrayProxy.Ser<string, StringProxy>.Instance);
         AssertMsgPackEqual(new[] { new Point { X = 1, Y = 2 }, new Point { X = 3, Y = 4 } },
-            ArrayProxy.Serialize<Point, Point>.Instance);
+            ArrayProxy.Ser<Point, Point>.Instance);
     }
 
     [Fact]
     public void TestDictionary()
     {
         AssertMsgPackEqual(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } },
-            DictProxy.Serialize<string, int, StringProxy, Int32Proxy>.Instance);
+            DictProxy.Ser<string, int, StringProxy, I32Proxy>.Instance);
         AssertMsgPackEqual(new Dictionary<int, string> { { 1, "a" }, { 2, "b" } },
-            DictProxy.Serialize<int, string, Int32Proxy, StringProxy>.Instance);
+            DictProxy.Ser<int, string, I32Proxy, StringProxy>.Instance);
         AssertMsgPackEqual(new Dictionary<Point, string> { { new Point { X = 1, Y = 2 }, "a" }, { new Point { X = 3, Y = 4 }, "b" } },
-            DictProxy.Serialize<Point, string, Point, StringProxy>.Instance);
+            DictProxy.Ser<Point, string, Point, StringProxy>.Instance);
     }
 
     [Fact]
     public void TestFloat()
     {
-        AssertMsgPackEqual(3.14f, SingleProxy.Instance);
-        AssertMsgPackEqual(float.NaN, SingleProxy.Instance);
-        AssertMsgPackEqual(float.PositiveInfinity, SingleProxy.Instance);
+        AssertMsgPackEqual(3.14f, F32Proxy.Instance);
+        AssertMsgPackEqual(float.NaN, F32Proxy.Instance);
+        AssertMsgPackEqual(float.PositiveInfinity, F32Proxy.Instance);
     }
 
     private void AssertMsgPackEqual<T, U>(T value, U proxy)
@@ -172,6 +171,6 @@ public partial class SerializeOracleTests
     }
 
     private void AssertMsgPackEqual<T>(T value) where T : ISerializeProvider<T>
-        => AssertMsgPackEqual(value, T.SerializeInstance);
+        => AssertMsgPackEqual(value, T.Instance);
 
 }

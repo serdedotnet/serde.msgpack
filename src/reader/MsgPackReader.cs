@@ -30,11 +30,6 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         throw new Exception("Unexpected end of stream");
     }
 
-    T IDeserializer.ReadAny<T>(IDeserializeVisitor<T> v)
-    {
-        throw new NotImplementedException();
-    }
-
     bool IDeserializer.ReadBool() => ReadBool();
 
     private bool ReadBool()
@@ -81,7 +76,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
     /// <summary>
     /// Eats at least one byte from the buffer.
     /// </summary>
-    bool TryReadByte(out byte result)
+    bool TryReadU8(out byte result)
     {
         return TryReadByte(EatByteOrThrow(), out result);
     }
@@ -102,27 +97,27 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         return false;
     }
 
-    byte IDeserializer.ReadByte() => ReadByte();
+    byte IDeserializer.ReadU8() => ReadU8();
 
-    private byte ReadByte()
+    private byte ReadU8()
     {
-        if (!TryReadByte(out var b))
+        if (!TryReadU8(out var b))
         {
             throw new Exception($"Expected byte 0xcc, got 0x{b:x}");
         }
         return b;
     }
 
-    char IDeserializer.ReadChar()
+    public char ReadChar()
     {
         // char is encoded as either a 1-2 byte integer
         return (char)ReadU16();
     }
 
-    IDeserializeCollection IDeserializer.ReadCollection(ISerdeInfo typeInfo)
+    private ITypeDeserializer ReadCollection(ISerdeInfo typeInfo)
     {
         var b = EatByteOrThrow();
-        if (typeInfo.Kind == InfoKind.Enumerable)
+        if (typeInfo.Kind == InfoKind.List)
         {
             int length;
             if (b <= 0x9f)
@@ -166,7 +161,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         }
         else
         {
-            throw new Exception("Expected collection");
+            throw new Exception("Expected either List or Dictionary, found " + typeInfo.Kind);
         }
     }
 
@@ -175,7 +170,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         throw new NotImplementedException();
     }
 
-    private double ReadDouble()
+    private double ReadF64()
     {
         var span = _reader.Span;
         if (span.Length < 9)
@@ -192,9 +187,9 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         return result;
     }
 
-    double IDeserializer.ReadDouble() => ReadDouble();
+    double IDeserializer.ReadF64() => ReadF64();
 
-    private float ReadFloat()
+    private float ReadF32()
     {
         var span = _reader.Span;
         if (span.Length < 5)
@@ -210,9 +205,9 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         _reader.Advance(5);
         return result;
     }
-    float IDeserializer.ReadFloat() => ReadFloat();
+    float IDeserializer.ReadF32() => ReadF32();
 
-    private bool TryReadSbyte(out sbyte s)
+    private bool TryReadI8(out sbyte s)
     {
         var first = EatByteOrThrow();
         if (first <= 0x7f || first >= 0xe0)
@@ -231,7 +226,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
 
     private bool TryReadI16(out short i16)
     {
-        if (TryReadSbyte(out var sb))
+        if (TryReadI8(out var sb))
         {
             i16 = sb;
             return true;
@@ -284,7 +279,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
     {
         if (!TryReadI32(out var i32))
         {
-            throw new Exception("Expected 32-bit integer");
+            throw new Exception($"Expected 32-bit integer, found 0x{i32:x}");
         }
         return i32;
     }
@@ -323,7 +318,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
 
     long IDeserializer.ReadI64() => ReadI64();
 
-    T? IDeserializer.ReadNullableRef<T, TProxy>(TProxy proxy)
+    T? IDeserializer.ReadNullableRef<T>(IDeserialize<T> proxy)
         where T : class
     {
         var b = PeekByteOrThrow();
@@ -335,9 +330,9 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         return proxy.Deserialize(this);
     }
 
-    public sbyte ReadSByte()
+    public sbyte ReadI8()
     {
-        if (!TryReadSbyte(out var sb))
+        if (!TryReadI8(out var sb))
         {
             throw new Exception("Expected signed byte");
         }
@@ -349,6 +344,13 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
     private string ReadString()
     {
         // strings are encoded in UTF8 as byte arrays
+        var span = ReadUtf8Span();
+        var str = Encoding.UTF8.GetString(span);
+        return str;
+    }
+
+    private ReadOnlySpan<byte> ReadUtf8Span()
+    {
         var b = EatByteOrThrow();
         int length;
         if (b <= 0xbf)
@@ -379,15 +381,17 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         {
             span = RefillNoEof(length);
         }
-        var str = Encoding.UTF8.GetString(span[..length]);
         _reader.Advance(length);
-        return str;
+        return span[..length];
     }
 
-    IDeserializeType IDeserializer.ReadType(ISerdeInfo typeInfo)
+    ITypeDeserializer IDeserializer.ReadType(ISerdeInfo typeInfo)
     {
-        // Types are just an array of fields
-        if (typeInfo.Kind == InfoKind.CustomType)
+        if (typeInfo.Kind == InfoKind.List || typeInfo.Kind == InfoKind.Dictionary)
+        {
+            return ReadCollection(typeInfo);
+        }
+        else if (typeInfo.Kind == InfoKind.CustomType)
         {
             var fieldCount = typeInfo.FieldCount;
             var b = EatByteOrThrow();
@@ -442,7 +446,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
 
     private bool TryReadU16(out ushort u16)
     {
-        if (TryReadByte(out var b))
+        if (TryReadU8(out var b))
         {
             u16 = b;
             return true;
