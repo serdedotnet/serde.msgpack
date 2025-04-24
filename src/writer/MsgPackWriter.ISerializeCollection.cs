@@ -58,5 +58,11 @@ partial class MsgPackWriter
         public void WriteValue<T>(ISerdeInfo typeInfo, int index, T value, ISerialize<T> serialize)
             where T : class?
             => serialize.Serialize(value, writer);
+
+        public void WriteDateTimeOffset(ISerdeInfo typeInfo, int index, DateTimeOffset dateTimeOffset)
+            => writer.WriteDateTimeOffset(dateTimeOffset);
+
+        public void WriteBytes(ISerdeInfo typeInfo, int index, ReadOnlyMemory<byte> bytes)
+            => writer.WriteBytes(bytes);
     }
 }

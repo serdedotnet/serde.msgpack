@@ -181,6 +181,13 @@ public partial class RoundTripTests
         AssertRoundTrip(float.PositiveInfinity, F32Proxy.Instance);
     }
 
+    [Fact]
+    public void TestBytes()
+    {
+        var bytes = new byte[] { 1, 2, 3, 4, 5 };
+        AssertRoundTrip(bytes, ByteArrayProxy.Instance);
+    }
+
     private static void AssertRoundTrip<T>(T expected)
         where T : ISerializeProvider<T>, IDeserializeProvider<T>, IEquatable<T>
     {
