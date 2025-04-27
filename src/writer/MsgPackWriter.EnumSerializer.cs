@@ -37,6 +37,8 @@ partial class MsgPackWriter
         public void WriteU64(ISerdeInfo typeInfo, int index, ulong u64) => writer.WriteU64(u64);
         public void WriteDateTimeOffset(ISerdeInfo typeInfo, int index, DateTimeOffset dateTimeOffset)
             => writer.WriteDateTimeOffset(dateTimeOffset);
+        public void WriteDateTime(ISerdeInfo typeInfo, int index, DateTime dateTime)
+            => writer.WriteDateTime(dateTime);
         public void WriteBytes(ISerdeInfo typeInfo, int index, ReadOnlyMemory<byte> bytes)
             => writer.WriteBytes(bytes);
     }

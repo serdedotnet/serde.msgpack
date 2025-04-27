@@ -134,9 +134,9 @@ partial class MsgPackReader<TReader>
             throw new NotImplementedException();
         }
 
-        DateTimeOffset ITypeDeserializer.ReadDateTimeOffset(ISerdeInfo info, int index)
+        DateTime ITypeDeserializer.ReadDateTime(ISerdeInfo info, int index)
         {
-            var next = deserializer.ReadDateTimeOffset();
+            var next = deserializer.ReadDateTime();
             _index++;
             return next;
         }
