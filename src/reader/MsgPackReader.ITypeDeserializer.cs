@@ -74,8 +74,8 @@ partial class MsgPackReader<TReader>
             }
         }
 
-        DateTimeOffset ITypeDeserializer.ReadDateTimeOffset(ISerdeInfo info, int index)
-            => deserializer.ReadDateTimeOffset();
+        DateTime ITypeDeserializer.ReadDateTime(ISerdeInfo info, int index)
+            => deserializer.ReadDateTime();
 
         void ITypeDeserializer.ReadBytes(ISerdeInfo info, int index, IBufferWriter<byte> writer)
         {

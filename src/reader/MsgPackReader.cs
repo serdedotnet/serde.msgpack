@@ -351,7 +351,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         return str;
     }
 
-    public DateTimeOffset ReadDateTimeOffset()
+    public DateTime ReadDateTime()
     {
         return DateTime.Parse(ReadString(), styles: DateTimeStyles.RoundtripKind);
     }

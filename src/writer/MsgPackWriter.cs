@@ -142,6 +142,11 @@ internal sealed partial class MsgPackWriter : ISerializer
         WriteString(dt.ToString("O"));
     }
 
+    public void WriteDateTime(DateTime dt)
+    {
+        WriteString(dt.ToString("O"));
+    }
+
     public void WriteBytes(ReadOnlyMemory<byte> bytes)
     {
         byte code = bytes.Length switch
