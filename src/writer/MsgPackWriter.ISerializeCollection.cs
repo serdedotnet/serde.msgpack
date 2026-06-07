@@ -55,6 +55,12 @@ partial class MsgPackWriter
         public void WriteU8(ISerdeInfo typeInfo, int index, byte b)
             => writer.WriteU8(b);
 
+        public void WriteU128(ISerdeInfo typeInfo, int index, UInt128 u128)
+            => writer.WriteU128(u128);
+
+        public void WriteI128(ISerdeInfo typeInfo, int index, Int128 i128)
+            => writer.WriteI128(i128);
+
         public void WriteValue<T>(ISerdeInfo typeInfo, int index, T value, ISerialize<T> serialize)
             where T : class?
             => serialize.Serialize(value, writer);

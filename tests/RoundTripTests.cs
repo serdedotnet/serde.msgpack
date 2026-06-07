@@ -72,9 +72,9 @@ public partial class RoundTripTests
     [Fact]
     public void TestByteEnum()
     {
-        AssertRoundTrip(ByteEnum.A, ByteEnumProxy.Instance);
-        AssertRoundTrip(ByteEnum.B, ByteEnumProxy.Instance);
-        AssertRoundTrip(ByteEnum.C, ByteEnumProxy.Instance);
+        AssertRoundTrip<ByteEnum, ByteEnumProxy, ByteEnumProxy>(ByteEnum.A);
+        AssertRoundTrip<ByteEnum, ByteEnumProxy, ByteEnumProxy>(ByteEnum.B);
+        AssertRoundTrip<ByteEnum, ByteEnumProxy, ByteEnumProxy>(ByteEnum.C);
     }
 
     [GenerateSerde]
@@ -86,9 +86,9 @@ public partial class RoundTripTests
     [Fact]
     public void TestIntEnum()
     {
-        AssertRoundTrip(IntEnum.A, IntEnumProxy.Instance);
-        AssertRoundTrip(IntEnum.B, IntEnumProxy.Instance);
-        AssertRoundTrip(IntEnum.C, IntEnumProxy.Instance);
+        AssertRoundTrip<IntEnum, IntEnumProxy, IntEnumProxy>(IntEnum.A);
+        AssertRoundTrip<IntEnum, IntEnumProxy, IntEnumProxy>(IntEnum.B);
+        AssertRoundTrip<IntEnum, IntEnumProxy, IntEnumProxy>(IntEnum.C);
     }
 
     [GenerateSerde]
@@ -186,6 +186,34 @@ public partial class RoundTripTests
     {
         var bytes = new byte[] { 1, 2, 3, 4, 5 };
         AssertRoundTrip(bytes, ByteArrayProxy.Instance);
+    }
+
+    [Fact]
+    public void TestU128()
+    {
+        AssertRoundTrip((UInt128)42, U128Proxy.Instance, U128Proxy.Instance);
+        AssertRoundTrip(UInt128.MaxValue, U128Proxy.Instance, U128Proxy.Instance);
+        AssertRoundTrip(UInt128.Zero, U128Proxy.Instance, U128Proxy.Instance);
+    }
+
+    [Fact]
+    public void TestI128()
+    {
+        AssertRoundTrip((Int128)42, I128Proxy.Instance, I128Proxy.Instance);
+        AssertRoundTrip((Int128)(-42), I128Proxy.Instance, I128Proxy.Instance);
+        AssertRoundTrip(Int128.MaxValue, I128Proxy.Instance, I128Proxy.Instance);
+        AssertRoundTrip(Int128.MinValue, I128Proxy.Instance, I128Proxy.Instance);
+    }
+
+    [Fact]
+    public void TestDateTimeOffset()
+    {
+        AssertRoundTrip(
+            new DateTimeOffset(2024, 6, 7, 1, 2, 3, TimeSpan.FromHours(-7)),
+            DateTimeOffsetProxy.Instance, DateTimeOffsetProxy.Instance);
+        AssertRoundTrip(
+            new DateTimeOffset(1999, 12, 31, 23, 59, 59, TimeSpan.Zero),
+            DateTimeOffsetProxy.Instance, DateTimeOffsetProxy.Instance);
     }
 
     private static void AssertRoundTrip<T>(T expected)
