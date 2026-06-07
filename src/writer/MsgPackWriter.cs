@@ -269,6 +269,29 @@ internal sealed partial class MsgPackWriter : ISerializer
 
     public void WriteU32(uint u32) => WriteU64(u32);
 
+    public void WriteU128(UInt128 u128)
+    {
+        Span<byte> bytes = stackalloc byte[16];
+        BinaryPrimitives.WriteUInt128BigEndian(bytes, u128);
+        WriteRawBin(bytes);
+    }
+
+    public void WriteI128(Int128 i128)
+    {
+        Span<byte> bytes = stackalloc byte[16];
+        BinaryPrimitives.WriteInt128BigEndian(bytes, i128);
+        WriteRawBin(bytes);
+    }
+
+    private void WriteRawBin(ReadOnlySpan<byte> bytes)
+    {
+        var span = _out.GetAppendSpan(2 + bytes.Length);
+        span[0] = 0xc4;
+        span[1] = (byte)bytes.Length;
+        bytes.CopyTo(span[2..]);
+        _out.Count += 2 + bytes.Length;
+    }
+
     void ISerializer.WriteU64(ulong u64) => WriteU64(u64);
 
     private void WriteU64(ulong u64)

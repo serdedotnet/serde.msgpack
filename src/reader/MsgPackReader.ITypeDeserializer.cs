@@ -38,39 +38,48 @@ partial class MsgPackReader<TReader>
 
         ulong ITypeDeserializer.ReadU64(ISerdeInfo info, int index) => deserializer.ReadU64();
 
+        UInt128 ITypeDeserializer.ReadU128(ISerdeInfo info, int index) => deserializer.ReadU128();
+
+        Int128 ITypeDeserializer.ReadI128(ISerdeInfo info, int index) => deserializer.ReadI128();
+
+        DateTimeOffset ITypeDeserializer.ReadDateTimeOffset(ISerdeInfo info, int index) => deserializer.ReadDateTimeOffset();
+
         T ITypeDeserializer.ReadValue<T>(ISerdeInfo info, int index, IDeserialize<T> deserialize)
              => deserialize.Deserialize(deserializer);
 
         void ITypeDeserializer.SkipValue(ISerdeInfo info, int index)
             => throw new NotImplementedException();
 
-        int ITypeDeserializer.TryReadIndex(ISerdeInfo map, out string? errorName)
+        int ITypeDeserializer.TryReadIndex(ISerdeInfo map)
+            => ReadIndexWithName(map).Item1;
+
+        (int, string?) ITypeDeserializer.TryReadIndexWithName(ISerdeInfo map)
+            => ReadIndexWithName(map);
+
+        private (int, string?) ReadIndexWithName(ISerdeInfo map)
         {
             // Two options: we have a struct/class, or an enum
             if (map.Kind == InfoKind.CustomType)
             {
                 if (_count >= map.FieldCount)
                 {
-                    errorName = null;
-                    return ITypeDeserializer.EndOfType;
+                    return (ITypeDeserializer.EndOfType, null);
                 }
                 // custom types are serialized like maps with field names as keys
                 var span = deserializer.ReadUtf8Span();
                 int index = map.TryGetIndex(span);
-                errorName = index == ITypeDeserializer.IndexNotFound ? span.ToString() : null;
+                var errorName = index == ITypeDeserializer.IndexNotFound ? span.ToString() : null;
                 _count++;
-                return index;
+                return (index, errorName);
             }
             else if (map.Kind == InfoKind.Enum)
             {
                 // Enums are serialized as the index of the enum member
-                errorName = null;
-                return deserializer.ReadI32();
+                return (deserializer.ReadI32(), null);
             }
             else
             {
-                errorName = "Expected a custom type or enum, found: " + map.Kind;
-                return ITypeDeserializer.IndexNotFound;
+                return (ITypeDeserializer.IndexNotFound, "Expected a custom type or enum, found: " + map.Kind);
             }
         }
 

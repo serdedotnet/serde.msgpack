@@ -540,6 +540,56 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         return u64;
     }
 
+    UInt128 IDeserializer.ReadU128() => ReadU128();
+
+    private UInt128 ReadU128()
+    {
+        var span = ReadBinSpan();
+        if (span.Length != 16)
+        {
+            throw new Exception($"Expected 16-byte integer, got {span.Length} bytes");
+        }
+        return BinaryPrimitives.ReadUInt128BigEndian(span);
+    }
+
+    Int128 IDeserializer.ReadI128() => ReadI128();
+
+    private Int128 ReadI128()
+    {
+        var span = ReadBinSpan();
+        if (span.Length != 16)
+        {
+            throw new Exception($"Expected 16-byte integer, got {span.Length} bytes");
+        }
+        return BinaryPrimitives.ReadInt128BigEndian(span);
+    }
+
+    DateTimeOffset IDeserializer.ReadDateTimeOffset() => ReadDateTimeOffset();
+
+    private DateTimeOffset ReadDateTimeOffset()
+    {
+        return DateTimeOffset.Parse(ReadString(), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+    }
+
+    private ReadOnlySpan<byte> ReadBinSpan()
+    {
+        var b = EatByteOrThrow();
+        int length = b switch
+        {
+            0xc4 => EatByteOrThrow(),
+            0xc5 => ReadBigEndianU16(),
+            0xc6 => checked((int)ReadBigEndianU32()),
+            _ => throw new Exception($"Expected bin, got 0x{b:x}"),
+        };
+        var span = _reader.Span;
+        if (span.Length < length)
+        {
+            span = RefillNoEof(length);
+        }
+        _reader.Advance(length);
+        return span[..length];
+    }
+
     private ushort ReadBigEndianU16()
     {
         var span = _reader.Span;
