@@ -82,9 +82,14 @@ internal sealed class ScratchBuffer : IDisposable
     /// </summary>
     public Span<byte> GetAppendSpan(int size)
     {
-        var count = Count;
-        EnsureCapacity(count + size);
-        return BufferSpan.Slice(count, size);
+        var rented = _rented;
+        int count = _count;
+        if (rented is null || (uint)(count + size) > (uint)rented.Length)
+        {
+            EnsureCapacity(count + size);
+            rented = _rented!;
+        }
+        return rented.AsSpan(count, size);
     }
 
     public void EnsureCapacity(int capacity)

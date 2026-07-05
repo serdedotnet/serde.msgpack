@@ -4,6 +4,12 @@ using BenchmarkDotNet.Running;
 using Benchmarks;
 using MessagePack;
 
+if (args.Length > 0 && args[0] == "check")
+{
+    CorrectnessCheck.Run();
+    return;
+}
+
 var msg1 = MessagePackSerializer.Serialize(Location.Sample);
 var msg2 = Serde.MsgPack.MsgPackSerializer.Serialize(Location.Sample);
 

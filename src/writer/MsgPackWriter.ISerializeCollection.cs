@@ -5,6 +5,9 @@ partial class MsgPackWriter
 {
     private sealed class SerCollection(MsgPackWriter writer) : ITypeSerializer
     {
+        public ISerializer WriteFieldStart(ISerdeInfo typeInfo, int index) => writer;
+        public void WriteFieldEnd(ISerdeInfo typeInfo, int index, ISerializer serializer) { }
+
         public void End(ISerdeInfo typeInfo)
         {
             // No action needed, all collections are length-prefixed
@@ -64,6 +67,9 @@ partial class MsgPackWriter
         public void WriteValue<T>(ISerdeInfo typeInfo, int index, T value, ISerialize<T> serialize)
             where T : class?
             => serialize.Serialize(value, writer);
+
+        public void WriteEnum(ISerdeInfo typeInfo, int index, ISerdeInfo fieldInfo, int ordinal)
+            => writer.WriteEnum(fieldInfo, ordinal);
 
         public void WriteDateTimeOffset(ISerdeInfo typeInfo, int index, DateTimeOffset dateTimeOffset)
             => writer.WriteDateTimeOffset(dateTimeOffset);
