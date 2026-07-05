@@ -1,4 +1,3 @@
-
 using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -9,12 +8,11 @@ namespace Serde.MsgPack;
 internal sealed partial class MsgPackWriter : ISerializer
 {
     private readonly ScratchBuffer _out;
-    private readonly EnumSerializer _enumSerializer;
+    private CompactSerializer? _compactSerializer;
 
     public MsgPackWriter(ScratchBuffer scratch)
     {
         _out = scratch;
-        _enumSerializer = new EnumSerializer(this);
     }
 
     public void WriteBool(bool b)
@@ -30,24 +28,13 @@ internal sealed partial class MsgPackWriter : ISerializer
     {
         if (length is null)
         {
-            throw new InvalidOperationException("Cannot serialize a collection with an unknown length.");
+            throw new InvalidOperationException(
+                "Cannot serialize a collection with an unknown length."
+            );
         }
         if (typeInfo.Kind == InfoKind.List)
         {
-            if (length <= 15)
-            {
-                _out.Add((byte)(0x90 | length));
-            }
-            else if (length <= 0xffff)
-            {
-                _out.Add(0xdc);
-                WriteBigEndian((ushort)length);
-            }
-            else
-            {
-                _out.Add(0xdd);
-                WriteBigEndian((uint)length);
-            }
+            WriteArrayLength((int)length);
         }
         else if (typeInfo.Kind == InfoKind.Dictionary)
         {
@@ -58,6 +45,24 @@ internal sealed partial class MsgPackWriter : ISerializer
             throw new InvalidOperationException("Expected a collection, found: " + typeInfo.Kind);
         }
         return new SerCollection(this);
+    }
+
+    private void WriteArrayLength(int length)
+    {
+        if (length <= 15)
+        {
+            _out.Add((byte)(0x90 | length));
+        }
+        else if (length <= 0xffff)
+        {
+            _out.Add(0xdc);
+            WriteBigEndian((ushort)length);
+        }
+        else
+        {
+            _out.Add(0xdd);
+            WriteBigEndian((uint)length);
+        }
     }
 
     private void WriteMapLength(int length)
@@ -80,7 +85,8 @@ internal sealed partial class MsgPackWriter : ISerializer
 
     public void WriteDecimal(decimal d)
     {
-        throw new NotImplementedException();
+        // Match MessagePack-CSharp, which serializes decimal as its invariant string form.
+        WriteString(d.ToString(System.Globalization.CultureInfo.InvariantCulture));
     }
 
     public void WriteF64(double d)
@@ -132,19 +138,83 @@ internal sealed partial class MsgPackWriter : ISerializer
             WriteBigEndian(i64);
         }
     }
+
     public void WriteNull()
     {
         _out.Add(0xc0);
     }
 
+    // Number of seconds between 0001-01-01 (BCL DateTime epoch) and the Unix
+    // epoch (1970-01-01). Used to translate DateTime.Ticks into the msgpack
+    // timestamp extension's Unix-relative seconds.
+    private const long BclSecondsAtUnixEpoch = 62135596800;
+    private const long NanosecondsPerTick = 100;
+
     public void WriteDateTimeOffset(DateTimeOffset dt)
     {
-        WriteString(dt.ToString("O"));
+        // Matches MessagePack-CSharp: a 2-element array of the wall-clock time
+        // (encoded as a timestamp ext, treated as UTC) and the offset in minutes.
+        WriteArrayLength(2);
+        WriteTimestamp(dt.Ticks);
+        WriteI16(checked((short)(dt.Offset.Ticks / TimeSpan.TicksPerMinute)));
     }
 
     public void WriteDateTime(DateTime dt)
     {
-        WriteString(dt.ToString("O"));
+        // The msgpack timestamp extension encodes an absolute instant relative to
+        // the Unix epoch in UTC (msgpack spec); it cannot represent a zone or a
+        // DateTimeKind. A Local value would serialize to machine-timezone-dependent
+        // bytes and an Unspecified value has no defined instant at all, so we reject
+        // anything that isn't already UTC rather than silently converting.
+        if (dt.Kind != DateTimeKind.Utc)
+        {
+            throw new InvalidOperationException(
+                $"Cannot serialize a DateTime with Kind={dt.Kind}; the msgpack timestamp "
+                    + "extension only represents UTC instants. Convert the value to UTC "
+                    + "(e.g. DateTime.ToUniversalTime() or DateTime.SpecifyKind(value, DateTimeKind.Utc)) first."
+            );
+        }
+        WriteTimestamp(dt.Ticks);
+    }
+
+    /// <summary>
+    /// Writes BCL <paramref name="ticks"/> as a msgpack timestamp extension
+    /// (ext type -1), choosing the timestamp 32/64/96 encoding exactly as the
+    /// msgpack spec and MessagePack-CSharp do.
+    /// </summary>
+    private void WriteTimestamp(long ticks)
+    {
+        long secondsSinceBclEpoch = ticks / TimeSpan.TicksPerSecond;
+        long seconds = secondsSinceBclEpoch - BclSecondsAtUnixEpoch;
+        long nanoseconds = (ticks % TimeSpan.TicksPerSecond) * NanosecondsPerTick;
+
+        if ((seconds >> 34) == 0)
+        {
+            ulong data64 = ((ulong)nanoseconds << 34) | (ulong)seconds;
+            if ((data64 & 0xffffffff00000000UL) == 0)
+            {
+                // timestamp 32
+                _out.Add(0xd6);
+                _out.Add(0xff);
+                WriteBigEndian((uint)data64);
+            }
+            else
+            {
+                // timestamp 64
+                _out.Add(0xd7);
+                _out.Add(0xff);
+                WriteBigEndian(data64);
+            }
+        }
+        else
+        {
+            // timestamp 96
+            _out.Add(0xc7);
+            _out.Add(0x0c);
+            _out.Add(0xff);
+            WriteBigEndian((uint)nanoseconds);
+            WriteBigEndian(seconds);
+        }
     }
 
     public void WriteBytes(ReadOnlyMemory<byte> bytes)
@@ -153,13 +223,13 @@ internal sealed partial class MsgPackWriter : ISerializer
         {
             <= 0xff => 0xc4,
             <= 0xffff => 0xc5,
-            _ => 0xc6
+            _ => 0xc6,
         };
         var prefixLen = code switch
         {
             0xc4 => 2,
             0xc5 => 3,
-            _ => 5
+            _ => 5,
         };
         var span = _out.GetAppendSpan(prefixLen + bytes.Length);
         _out.Count += prefixLen + bytes.Length;
@@ -170,10 +240,10 @@ internal sealed partial class MsgPackWriter : ISerializer
                 span[1] = (byte)bytes.Length;
                 break;
             case 3:
-                WriteBigEndian((ushort)bytes.Length);
+                BinaryPrimitives.WriteUInt16BigEndian(span.Slice(1), (ushort)bytes.Length);
                 break;
             case 5:
-                WriteBigEndian((uint)bytes.Length);
+                BinaryPrimitives.WriteUInt32BigEndian(span.Slice(1), (uint)bytes.Length);
                 break;
         }
         bytes.Span.CopyTo(span[prefixLen..]);
@@ -181,33 +251,36 @@ internal sealed partial class MsgPackWriter : ISerializer
 
     public void WriteI8(sbyte b) => WriteI64(b);
 
-    private static readonly Encoding _utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+    private static readonly Encoding _utf8 = new UTF8Encoding(
+        encoderShouldEmitUTF8Identifier: false,
+        throwOnInvalidBytes: true
+    );
 
     public void WriteString(string s)
     {
-        // We can write the string directly to the output buffer, but the string
-        // is length-prefixed and we don't know precisely how long it will be until
-        // we encode it. So we need to write space for the length prefix first, then
-        // write the string, and finally go back, fill in the length prefix, and move
-        // the string if necessary.
-        var sLen = s.Length;
-        var maxByteCount = _utf8.GetMaxByteCount(sLen);
-        var appendSpan = _out.GetAppendSpan(checked(maxByteCount + 5 /* max length prefix */));
-        int estimatedOffset = sLen switch {
-            <= 31 => 1,
-            <= 255 => 2,
-            <= 65535 => 3,
-            _ => 5
-        };
-        var u8Dest = appendSpan.Slice(estimatedOffset, maxByteCount);
-        int actualStrSize = _utf8.GetBytes(s, u8Dest);
-        // write prefix and move body if necessary
-        int actualOffset = WriteUtf8Header(actualStrSize, appendSpan);
-		if (actualOffset < estimatedOffset)
+        // Single-pass encode: reserve worst-case space, then optimistically
+        // size the length prefix assuming an ASCII (1 byte/char) encoding -- the
+        // common case -- and encode the body once at that offset. Only if multi
+        // byte characters push the UTF-8 byte count into a larger prefix class do
+        // we shift the body (Span.CopyTo uses memmove and handles overlap).
+        int charLen = s.Length;
+        int maxByteCount = _utf8.GetMaxByteCount(charLen);
+        var appendSpan = _out.GetAppendSpan(
+            checked(
+                maxByteCount + 5 /* max length prefix */
+            )
+        );
+        int guessOffset = Utf8HeaderSize(charLen);
+        int byteCount = _utf8.GetBytes(s, appendSpan.Slice(guessOffset, maxByteCount));
+        int actualOffset = Utf8HeaderSize(byteCount);
+        if (actualOffset != guessOffset)
         {
-            u8Dest.CopyTo(appendSpan.Slice(actualOffset, actualStrSize));
+            appendSpan
+                .Slice(guessOffset, byteCount)
+                .CopyTo(appendSpan.Slice(actualOffset, byteCount));
         }
-        _out.Count += actualOffset + actualStrSize;
+        WriteUtf8Header(byteCount, appendSpan);
+        _out.Count += actualOffset + byteCount;
     }
 
     private void WriteUtf8(ReadOnlySpan<byte> str)
@@ -217,6 +290,16 @@ internal sealed partial class MsgPackWriter : ISerializer
         str.CopyTo(span.Slice(offset, str.Length));
         _out.Count += offset + str.Length;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int Utf8HeaderSize(int length) =>
+        length switch
+        {
+            <= 31 => 1,
+            <= 0xff => 2,
+            <= 0xffff => 3,
+            _ => 5,
+        };
 
     /// <summary>
     /// Assumes that span is large enough to hold the header.
@@ -256,13 +339,30 @@ internal sealed partial class MsgPackWriter : ISerializer
         switch (typeInfo.Kind)
         {
             case InfoKind.CustomType:
-                // Custom types are serialized as a map
+                if (typeInfo.HasExplicitFieldOrdinals)
+                {
+                    // Compact representation: serialize as a positional array indexed by
+                    // ordinal (matching MessagePack-CSharp's integer-key encoding). The
+                    // array length is the largest ordinal + 1; holes are filled with nil.
+                    var fieldCount = typeInfo.FieldCount;
+                    int length = fieldCount == 0 ? 0 : typeInfo.GetFieldOrdinal(fieldCount - 1) + 1;
+                    WriteArrayLength(length);
+                    var ser = _compactSerializer ??= new CompactSerializer(this);
+                    ser.Begin(length);
+                    return ser;
+                }
+                // Otherwise serialize as a map keyed by field name.
                 WriteMapLength(typeInfo.FieldCount);
                 return this;
-            case InfoKind.Enum:
-                return _enumSerializer;
         }
         throw new InvalidOperationException("Unexpected info kind: " + typeInfo.Kind);
+    }
+
+    // Enums are serialized as a msgpack string of the variant name (the field name at
+    // the given ordinal in the enum's SerdeInfo), matching serde's name-based enum model.
+    public void WriteEnum(ISerdeInfo info, int ordinal)
+    {
+        WriteUtf8(info.GetFieldName(ordinal));
     }
 
     public void WriteU16(ushort u16) => WriteU64(u16);
@@ -325,41 +425,37 @@ internal sealed partial class MsgPackWriter : ISerializer
     private void WriteBigEndian(ushort value)
     {
         var span = _out.GetAppendSpan(2);
-        BinaryPrimitives.WriteUInt16BigEndian(
-            span,
-            value);
+        BinaryPrimitives.WriteUInt16BigEndian(span, value);
         _out.Count += 2;
     }
 
     private void WriteBigEndian(uint value)
     {
         var span = _out.GetAppendSpan(4);
-        BinaryPrimitives.WriteUInt32BigEndian(
-            span,
-            value
-        );
+        BinaryPrimitives.WriteUInt32BigEndian(span, value);
         _out.Count += 4;
     }
 
     private void WriteBigEndian(ulong value)
     {
         var span = _out.GetAppendSpan(8);
-        BinaryPrimitives.WriteUInt64BigEndian(
-            span,
-            value
-        );
+        BinaryPrimitives.WriteUInt64BigEndian(span, value);
         _out.Count += 8;
     }
 
     private void WriteBigEndian(short value) => WriteBigEndian((ushort)value);
+
     private void WriteBigEndian(int value) => WriteBigEndian((uint)value);
+
     private void WriteBigEndian(long value) => WriteBigEndian((ulong)value);
+
     private void WriteBigEndian(float value)
     {
         var span = _out.GetAppendSpan(4);
         BinaryPrimitives.WriteSingleBigEndian(span, value);
         _out.Count += 4;
     }
+
     private void WriteBigEndian(double value)
     {
         var span = _out.GetAppendSpan(8);

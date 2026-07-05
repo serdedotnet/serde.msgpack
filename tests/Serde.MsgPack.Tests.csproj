@@ -1,14 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <!-- MsgPack017 fires on init-accessor test models whose key is always present; not applicable here. -->
+    <NoWarn>$(NoWarn);MsgPack017</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="CsCheck" />
     <PackageReference Include="MessagePack" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="Serde" />
@@ -23,5 +25,4 @@
   <ItemGroup>
     <ProjectReference Include="..\src\Serde.MsgPack.csproj" />
   </ItemGroup>
-
 </Project>

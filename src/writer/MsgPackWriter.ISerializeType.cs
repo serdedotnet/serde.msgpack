@@ -1,4 +1,3 @@
-
 using Serde;
 
 namespace Serde.MsgPack;
@@ -11,15 +10,42 @@ partial class MsgPackWriter : ITypeSerializer
         WriteUtf8(fieldName);
     }
 
+    ISerializer ITypeSerializer.WriteFieldStart(ISerdeInfo typeInfo, int fieldIndex)
+    {
+        WritePropertyName(typeInfo, fieldIndex);
+        return this;
+    }
+
+    void ITypeSerializer.WriteFieldEnd(ISerdeInfo typeInfo, int fieldIndex, ISerializer serializer)
+    {
+        // No-op: all types are length-prefixed.
+    }
+
     void ITypeSerializer.End(ISerdeInfo typeInfo)
     {
         // No end, all types are length-prefixed
     }
 
-    void ITypeSerializer.WriteValue<T>(ISerdeInfo typeInfo, int fieldIndex, T value, ISerialize<T> serialize)
+    void ITypeSerializer.WriteValue<T>(
+        ISerdeInfo typeInfo,
+        int fieldIndex,
+        T value,
+        ISerialize<T> serialize
+    )
     {
         WritePropertyName(typeInfo, fieldIndex);
         serialize.Serialize(value, this);
+    }
+
+    void ITypeSerializer.WriteEnum(
+        ISerdeInfo typeInfo,
+        int index,
+        ISerdeInfo fieldInfo,
+        int ordinal
+    )
+    {
+        WritePropertyName(typeInfo, index);
+        WriteEnum(fieldInfo, ordinal);
     }
 
     void ITypeSerializer.WriteBool(ISerdeInfo typeInfo, int index, bool b)
