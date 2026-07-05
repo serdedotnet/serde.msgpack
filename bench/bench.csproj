@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <!-- Ported StackExchange reference models: suppress nullable-init and comparer nullability warnings. -->
+    <NoWarn>$(NoWarn);CS8618;CS8767</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
