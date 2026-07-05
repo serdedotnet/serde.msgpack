@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 using System.Collections.Generic;
 
@@ -69,21 +68,20 @@ namespace Benchmark.Models
 
         public bool Equals(Info obj)
         {
-            return
-                this.answers_per_minute.TrueEquals(obj.answers_per_minute) &&
-                this.api_revision.TrueEqualsString(obj.api_revision) &&
-                this.badges_per_minute.TrueEquals(obj.badges_per_minute) &&
-                this.new_active_users.TrueEquals(obj.new_active_users) &&
-                this.questions_per_minute.TrueEquals(obj.questions_per_minute) &&
-                this.site.TrueEquals(obj.site) &&
-                this.total_accepted.TrueEquals(obj.total_accepted) &&
-                this.total_answers.TrueEquals(obj.total_answers) &&
-                this.total_badges.TrueEquals(obj.total_badges) &&
-                this.total_comments.TrueEquals(obj.total_comments) &&
-                this.total_questions.TrueEquals(obj.total_questions) &&
-                this.total_unanswered.TrueEquals(obj.total_unanswered) &&
-                this.total_users.TrueEquals(obj.total_users) &&
-                this.total_votes.TrueEquals(obj.total_votes);
+            return this.answers_per_minute.TrueEquals(obj.answers_per_minute)
+                && this.api_revision.TrueEqualsString(obj.api_revision)
+                && this.badges_per_minute.TrueEquals(obj.badges_per_minute)
+                && this.new_active_users.TrueEquals(obj.new_active_users)
+                && this.questions_per_minute.TrueEquals(obj.questions_per_minute)
+                && this.site.TrueEquals(obj.site)
+                && this.total_accepted.TrueEquals(obj.total_accepted)
+                && this.total_answers.TrueEquals(obj.total_answers)
+                && this.total_badges.TrueEquals(obj.total_badges)
+                && this.total_comments.TrueEquals(obj.total_comments)
+                && this.total_questions.TrueEquals(obj.total_questions)
+                && this.total_unanswered.TrueEquals(obj.total_unanswered)
+                && this.total_users.TrueEquals(obj.total_users)
+                && this.total_votes.TrueEquals(obj.total_votes);
         }
 
         [MessagePack.MessagePackObject]
@@ -173,25 +171,24 @@ namespace Benchmark.Models
 
             public bool Equals(Site obj)
             {
-                return
-                    this.aliases.TrueEqualsString(obj.aliases) &&
-                    this.api_site_parameter.TrueEqualsString(obj.api_site_parameter) &&
-                    this.audience.TrueEqualsString(obj.audience) &&
-                    this.closed_beta_date.TrueEquals(obj.closed_beta_date) &&
-                    this.favicon_url.TrueEqualsString(obj.favicon_url) &&
-                    this.high_resolution_icon_url.TrueEqualsString(obj.high_resolution_icon_url) &&
-                    this.icon_url.TrueEqualsString(obj.icon_url) &&
-                    this.launch_date.TrueEquals(obj.launch_date) &&
-                    this.logo_url.TrueEqualsString(obj.logo_url) &&
-                    this.markdown_extensions.TrueEqualsString(obj.markdown_extensions) &&
-                    this.name.TrueEqualsString(obj.name) &&
-                    this.open_beta_date.TrueEquals(obj.open_beta_date) &&
-                    this.related_sites.TrueEqualsList(obj.related_sites) &&
-                    this.site_state.TrueEquals(obj.site_state) &&
-                    this.site_type.TrueEqualsString(obj.site_type) &&
-                    this.site_url.TrueEqualsString(obj.site_url) &&
-                    this.styling.TrueEquals(obj.styling) &&
-                    this.twitter_account.TrueEqualsString(obj.twitter_account);
+                return this.aliases.TrueEqualsString(obj.aliases)
+                    && this.api_site_parameter.TrueEqualsString(obj.api_site_parameter)
+                    && this.audience.TrueEqualsString(obj.audience)
+                    && this.closed_beta_date.TrueEquals(obj.closed_beta_date)
+                    && this.favicon_url.TrueEqualsString(obj.favicon_url)
+                    && this.high_resolution_icon_url.TrueEqualsString(obj.high_resolution_icon_url)
+                    && this.icon_url.TrueEqualsString(obj.icon_url)
+                    && this.launch_date.TrueEquals(obj.launch_date)
+                    && this.logo_url.TrueEqualsString(obj.logo_url)
+                    && this.markdown_extensions.TrueEqualsString(obj.markdown_extensions)
+                    && this.name.TrueEqualsString(obj.name)
+                    && this.open_beta_date.TrueEquals(obj.open_beta_date)
+                    && this.related_sites.TrueEqualsList(obj.related_sites)
+                    && this.site_state.TrueEquals(obj.site_state)
+                    && this.site_type.TrueEqualsString(obj.site_type)
+                    && this.site_url.TrueEqualsString(obj.site_url)
+                    && this.styling.TrueEquals(obj.styling)
+                    && this.twitter_account.TrueEqualsString(obj.twitter_account);
             }
 
             [MessagePack.MessagePackObject]
@@ -212,10 +209,9 @@ namespace Benchmark.Models
 
                 public bool Equals(Styling obj)
                 {
-                    return
-                        this.link_color.TrueEqualsString(obj.link_color) &&
-                        this.tag_background_color.TrueEqualsString(obj.tag_background_color) &&
-                        this.tag_foreground_color.TrueEqualsString(obj.tag_foreground_color);
+                    return this.link_color.TrueEqualsString(obj.link_color)
+                        && this.tag_background_color.TrueEqualsString(obj.tag_background_color)
+                        && this.tag_foreground_color.TrueEqualsString(obj.tag_foreground_color);
                 }
             }
         }
@@ -250,10 +246,9 @@ namespace Benchmark.Models
 
             public bool Equals(RelatedSite obj)
             {
-                return
-                    this.name.TrueEqualsString(obj.name) &&
-                    this.relation.TrueEquals(obj.relation) &&
-                    this.api_site_parameter.TrueEqualsString(obj.api_site_parameter);
+                return this.name.TrueEqualsString(obj.name)
+                    && this.relation.TrueEquals(obj.relation)
+                    && this.api_site_parameter.TrueEqualsString(obj.api_site_parameter);
             }
         }
     }

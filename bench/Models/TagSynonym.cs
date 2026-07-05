@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 
 namespace Benchmark.Models
@@ -32,12 +31,11 @@ namespace Benchmark.Models
 
         public bool Equals(TagSynonym obj)
         {
-            return
-                this.applied_count.TrueEquals(obj.applied_count) &&
-                this.creation_date.TrueEquals(obj.creation_date) &&
-                this.from_tag.TrueEqualsString(obj.from_tag) &&
-                this.last_applied_date.TrueEquals(obj.last_applied_date) &&
-                this.to_tag.TrueEqualsString(obj.to_tag);
+            return this.applied_count.TrueEquals(obj.applied_count)
+                && this.creation_date.TrueEquals(obj.creation_date)
+                && this.from_tag.TrueEqualsString(obj.from_tag)
+                && this.last_applied_date.TrueEquals(obj.last_applied_date)
+                && this.to_tag.TrueEqualsString(obj.to_tag);
         }
     }
 }

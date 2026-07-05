@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 
 namespace Benchmark.Models
@@ -69,18 +68,17 @@ namespace Benchmark.Models
 
         public bool Equals(UserTimeline obj)
         {
-            return
-                this.badge_id.TrueEquals(obj.badge_id) &&
-                this.comment_id.TrueEquals(obj.comment_id) &&
-                this.creation_date.TrueEquals(obj.creation_date) &&
-                this.detail.TrueEqualsString(obj.detail) &&
-                this.link.TrueEqualsString(obj.link) &&
-                this.post_id.TrueEquals(obj.post_id) &&
-                this.post_type.TrueEquals(obj.post_type) &&
-                this.suggested_edit_id.TrueEquals(obj.suggested_edit_id) &&
-                this.timeline_type.TrueEquals(obj.timeline_type) &&
-                this.title.TrueEqualsString(obj.title) &&
-                this.user_id.TrueEquals(obj.user_id);
+            return this.badge_id.TrueEquals(obj.badge_id)
+                && this.comment_id.TrueEquals(obj.comment_id)
+                && this.creation_date.TrueEquals(obj.creation_date)
+                && this.detail.TrueEqualsString(obj.detail)
+                && this.link.TrueEqualsString(obj.link)
+                && this.post_id.TrueEquals(obj.post_id)
+                && this.post_type.TrueEquals(obj.post_type)
+                && this.suggested_edit_id.TrueEquals(obj.suggested_edit_id)
+                && this.timeline_type.TrueEquals(obj.timeline_type)
+                && this.title.TrueEqualsString(obj.title)
+                && this.user_id.TrueEquals(obj.user_id);
         }
     }
 }

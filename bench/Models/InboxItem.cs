@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 
 namespace Benchmark.Models
@@ -65,17 +64,16 @@ namespace Benchmark.Models
 
         public bool Equals(InboxItem obj)
         {
-            return
-                this.answer_id.TrueEquals(obj.answer_id) &&
-                this.body.TrueEqualsString(obj.body) &&
-                this.comment_id.TrueEquals(obj.comment_id) &&
-                this.creation_date.TrueEquals(obj.creation_date) &&
-                this.is_unread.TrueEquals(obj.is_unread) &&
-                this.item_type.TrueEquals(obj.item_type) &&
-                this.link.TrueEqualsString(obj.link) &&
-                this.question_id.TrueEquals(obj.question_id) &&
-                this.site.TrueEquals(obj.site) &&
-                this.title.TrueEqualsString(obj.title);
+            return this.answer_id.TrueEquals(obj.answer_id)
+                && this.body.TrueEqualsString(obj.body)
+                && this.comment_id.TrueEquals(obj.comment_id)
+                && this.creation_date.TrueEquals(obj.creation_date)
+                && this.is_unread.TrueEquals(obj.is_unread)
+                && this.item_type.TrueEquals(obj.item_type)
+                && this.link.TrueEqualsString(obj.link)
+                && this.question_id.TrueEquals(obj.question_id)
+                && this.site.TrueEquals(obj.site)
+                && this.title.TrueEqualsString(obj.title);
         }
     }
 }

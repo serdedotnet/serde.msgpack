@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 
 namespace Benchmark.Models
@@ -24,10 +23,9 @@ namespace Benchmark.Models
 
         public bool Equals(AccountMerge obj)
         {
-            return
-                this.old_account_id.TrueEquals(obj.old_account_id) &&
-                this.new_account_id.TrueEquals(obj.new_account_id) &&
-                this.merge_date.TrueEquals(obj.merge_date);
+            return this.old_account_id.TrueEquals(obj.old_account_id)
+                && this.new_account_id.TrueEquals(obj.new_account_id)
+                && this.merge_date.TrueEquals(obj.merge_date);
         }
     }
 }

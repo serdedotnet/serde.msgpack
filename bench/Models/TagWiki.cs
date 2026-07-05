@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 
 namespace Benchmark.Models
@@ -40,14 +39,13 @@ namespace Benchmark.Models
 
         public bool Equals(TagWiki obj)
         {
-            return
-                this.body.TrueEqualsString(obj.body) &&
-                this.body_last_edit_date.TrueEquals(obj.body_last_edit_date) &&
-                this.excerpt.TrueEqualsString(obj.excerpt) &&
-                this.excerpt_last_edit_date.TrueEquals(obj.excerpt_last_edit_date) &&
-                this.last_body_editor.TrueEquals(obj.last_body_editor) &&
-                this.last_excerpt_editor.TrueEquals(obj.last_excerpt_editor) &&
-                this.tag_name.TrueEqualsString(obj.tag_name);
+            return this.body.TrueEqualsString(obj.body)
+                && this.body_last_edit_date.TrueEquals(obj.body_last_edit_date)
+                && this.excerpt.TrueEqualsString(obj.excerpt)
+                && this.excerpt_last_edit_date.TrueEquals(obj.excerpt_last_edit_date)
+                && this.last_body_editor.TrueEquals(obj.last_body_editor)
+                && this.last_excerpt_editor.TrueEquals(obj.last_excerpt_editor)
+                && this.tag_name.TrueEqualsString(obj.tag_name);
         }
     }
 }

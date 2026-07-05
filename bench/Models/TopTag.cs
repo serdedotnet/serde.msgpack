@@ -1,8 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
-
 namespace Benchmark.Models
 {
     [MessagePack.MessagePackObject]
@@ -35,13 +33,12 @@ namespace Benchmark.Models
 
         public bool Equals(TopTag obj)
         {
-            return
-                this.answer_count.TrueEquals(obj.answer_count) &&
-                this.answer_score.TrueEquals(obj.answer_score) &&
-                this.question_count.TrueEquals(obj.question_count) &&
-                this.question_score.TrueEquals(obj.question_score) &&
-                this.tag_name.TrueEqualsString(obj.tag_name) &&
-                this.user_id.TrueEquals(obj.user_id);
+            return this.answer_count.TrueEquals(obj.answer_count)
+                && this.answer_score.TrueEquals(obj.answer_score)
+                && this.question_count.TrueEquals(obj.question_count)
+                && this.question_score.TrueEquals(obj.question_score)
+                && this.tag_name.TrueEqualsString(obj.tag_name)
+                && this.user_id.TrueEquals(obj.user_id);
         }
     }
 }

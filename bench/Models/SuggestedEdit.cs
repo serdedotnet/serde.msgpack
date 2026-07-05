@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 using System.Collections.Generic;
 
@@ -57,18 +56,17 @@ namespace Benchmark.Models
 
         public bool Equals(SuggestedEdit obj)
         {
-            return
-                this.approval_date.TrueEquals(obj.approval_date) &&
-                this.body.TrueEqualsString(obj.body) &&
-                this.comment.TrueEqualsString(obj.comment) &&
-                this.creation_date.TrueEquals(obj.creation_date) &&
-                this.post_id.TrueEquals(obj.post_id) &&
-                this.post_type.TrueEquals(obj.post_type) &&
-                this.proposing_user.TrueEquals(obj.proposing_user) &&
-                this.rejection_date.TrueEquals(obj.rejection_date) &&
-                this.suggested_edit_id.TrueEquals(obj.suggested_edit_id) &&
-                this.tags.TrueEqualsString(obj.tags) &&
-                this.title.TrueEqualsString(obj.title);
+            return this.approval_date.TrueEquals(obj.approval_date)
+                && this.body.TrueEqualsString(obj.body)
+                && this.comment.TrueEqualsString(obj.comment)
+                && this.creation_date.TrueEquals(obj.creation_date)
+                && this.post_id.TrueEquals(obj.post_id)
+                && this.post_type.TrueEquals(obj.post_type)
+                && this.proposing_user.TrueEquals(obj.proposing_user)
+                && this.rejection_date.TrueEquals(obj.rejection_date)
+                && this.suggested_edit_id.TrueEquals(obj.suggested_edit_id)
+                && this.tags.TrueEqualsString(obj.tags)
+                && this.title.TrueEqualsString(obj.title);
         }
     }
 }

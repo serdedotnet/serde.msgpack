@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 
 namespace Benchmark.Models
@@ -56,15 +55,14 @@ namespace Benchmark.Models
 
         public bool Equals(Reputation obj)
         {
-            return
-                this.link.TrueEqualsString(obj.link) &&
-                this.on_date.TrueEquals(obj.on_date) &&
-                this.post_id.TrueEquals(obj.post_id) &&
-                this.post_type.TrueEquals(obj.post_type) &&
-                this.reputation_change.TrueEquals(obj.reputation_change) &&
-                this.title.TrueEqualsString(obj.title) &&
-                this.user_id.TrueEquals(obj.user_id) &&
-                this.vote_type.TrueEquals(obj.vote_type);
+            return this.link.TrueEqualsString(obj.link)
+                && this.on_date.TrueEquals(obj.on_date)
+                && this.post_id.TrueEquals(obj.post_id)
+                && this.post_type.TrueEquals(obj.post_type)
+                && this.reputation_change.TrueEquals(obj.reputation_change)
+                && this.title.TrueEqualsString(obj.title)
+                && this.user_id.TrueEquals(obj.user_id)
+                && this.vote_type.TrueEquals(obj.vote_type);
         }
     }
 }

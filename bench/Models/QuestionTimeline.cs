@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 
 namespace Benchmark.Models
@@ -65,17 +64,16 @@ namespace Benchmark.Models
 
         public bool Equals(QuestionTimeline obj)
         {
-            return
-                this.comment_id.TrueEquals(obj.comment_id) &&
-                this.creation_date.TrueEquals(obj.creation_date) &&
-                this.down_vote_count.TrueEquals(obj.down_vote_count) &&
-                this.owner.TrueEquals(obj.owner) &&
-                this.post_id.TrueEquals(obj.post_id) &&
-                this.question_id.TrueEquals(obj.question_id) &&
-                this.revision_guid.TrueEqualsString(obj.revision_guid) &&
-                this.timeline_type.TrueEquals(obj.timeline_type) &&
-                this.up_vote_count.TrueEquals(obj.up_vote_count) &&
-                this.user.TrueEquals(obj.user);
+            return this.comment_id.TrueEquals(obj.comment_id)
+                && this.creation_date.TrueEquals(obj.creation_date)
+                && this.down_vote_count.TrueEquals(obj.down_vote_count)
+                && this.owner.TrueEquals(obj.owner)
+                && this.post_id.TrueEquals(obj.post_id)
+                && this.question_id.TrueEquals(obj.question_id)
+                && this.revision_guid.TrueEqualsString(obj.revision_guid)
+                && this.timeline_type.TrueEquals(obj.timeline_type)
+                && this.up_vote_count.TrueEquals(obj.up_vote_count)
+                && this.user.TrueEquals(obj.user);
         }
     }
 }

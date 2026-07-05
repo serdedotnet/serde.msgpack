@@ -1,8 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
-
 namespace Benchmark.Models
 {
     [Serde.GenerateSerde(AsUnderlying = true)]
@@ -58,15 +56,14 @@ namespace Benchmark.Models
 
         public bool Equals(Badge obj)
         {
-            return
-                this.award_count.TrueEquals(obj.award_count) &&
-                this.badge_id.TrueEquals(obj.badge_id) &&
-                this.badge_type.TrueEquals(obj.badge_type) &&
-                this.description.TrueEqualsString(obj.description) &&
-                this.link.TrueEqualsString(obj.link) &&
-                this.name.TrueEqualsString(obj.name) &&
-                this.rank.TrueEquals(obj.rank) &&
-                this.user.TrueEquals(obj.user);
+            return this.award_count.TrueEquals(obj.award_count)
+                && this.badge_id.TrueEquals(obj.badge_id)
+                && this.badge_type.TrueEquals(obj.badge_type)
+                && this.description.TrueEqualsString(obj.description)
+                && this.link.TrueEqualsString(obj.link)
+                && this.name.TrueEqualsString(obj.name)
+                && this.rank.TrueEquals(obj.rank)
+                && this.user.TrueEquals(obj.user);
         }
     }
 }

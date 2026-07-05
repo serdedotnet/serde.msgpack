@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 
 namespace Benchmark.Models
@@ -42,12 +41,11 @@ namespace Benchmark.Models
 
         public bool Equals(Event obj)
         {
-            return
-                this.creation_date.TrueEquals(obj.creation_date) &&
-                this.event_id.TrueEquals(obj.event_id) &&
-                this.event_type.TrueEquals(obj.event_type) &&
-                this.excerpt.TrueEqualsString(obj.excerpt) &&
-                this.link.TrueEqualsString(obj.link);
+            return this.creation_date.TrueEquals(obj.creation_date)
+                && this.event_id.TrueEquals(obj.event_id)
+                && this.event_type.TrueEquals(obj.event_type)
+                && this.excerpt.TrueEqualsString(obj.excerpt)
+                && this.link.TrueEqualsString(obj.link);
         }
     }
 }

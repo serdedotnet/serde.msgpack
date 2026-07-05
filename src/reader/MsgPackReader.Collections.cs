@@ -1,4 +1,3 @@
-
 using System.Buffers;
 
 namespace Serde.MsgPack;
@@ -32,11 +31,12 @@ partial class MsgPackReader<TReader>
 
         void ITypeDeserializer.End(ISerdeInfo info) => deserializer.ReturnCollection(this);
 
-        int? ITypeDeserializer.SizeOpt => isDict switch
-        {
-            true => length / 2,
-            false => length,
-        };
+        int? ITypeDeserializer.SizeOpt =>
+            isDict switch
+            {
+                true => length / 2,
+                false => length,
+            };
 
         bool ITypeDeserializer.ReadBool(ISerdeInfo info, int index)
         {
@@ -191,7 +191,11 @@ partial class MsgPackReader<TReader>
 
         IDeserializer ITypeDeserializer.ReadFieldStart(ISerdeInfo info, int index) => deserializer;
 
-        void ITypeDeserializer.ReadFieldEnd(ISerdeInfo info, int index, IDeserializer deserializer) => _index++;
+        void ITypeDeserializer.ReadFieldEnd(
+            ISerdeInfo info,
+            int index,
+            IDeserializer deserializer
+        ) => _index++;
 
         void ITypeDeserializer.SkipValue(ISerdeInfo info, int index)
         {

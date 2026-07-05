@@ -1,8 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
-
 namespace Benchmark.Models
 {
     [MessagePack.MessagePackObject]
@@ -23,10 +21,9 @@ namespace Benchmark.Models
 
         public bool Equals(TagScore obj)
         {
-            return
-                this.post_count.TrueEquals(obj.post_count) &&
-                this.score.TrueEquals(obj.score) &&
-                this.user.TrueEquals(obj.user);
+            return this.post_count.TrueEquals(obj.post_count)
+                && this.score.TrueEquals(obj.score)
+                && this.user.TrueEquals(obj.user);
         }
     }
 }

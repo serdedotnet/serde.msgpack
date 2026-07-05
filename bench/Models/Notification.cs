@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 
 namespace Benchmark.Models
@@ -56,12 +55,11 @@ namespace Benchmark.Models
 
         public bool Equals(Notification obj)
         {
-            return
-                this.body.TrueEqualsString(obj.body) &&
-                this.site.TrueEquals(obj.site) &&
-                this.creation_date.TrueEquals(obj.creation_date) &&
-                this.post_id.TrueEquals(obj.post_id) &&
-                this.is_unread.TrueEquals(obj.is_unread);
+            return this.body.TrueEqualsString(obj.body)
+                && this.site.TrueEquals(obj.site)
+                && this.creation_date.TrueEquals(obj.creation_date)
+                && this.post_id.TrueEquals(obj.post_id)
+                && this.is_unread.TrueEquals(obj.is_unread);
         }
     }
 }

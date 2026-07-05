@@ -1,4 +1,3 @@
-
 namespace Serde.MsgPack.Tests;
 
 /// <summary>
@@ -21,19 +20,19 @@ public partial class SpecConformanceTests
     // Non-negative values are always encoded in the smallest unsigned form.
 
     [Theory]
-    [InlineData("00", 0UL)]                       // positive fixint
-    [InlineData("01", 1UL)]                       // positive fixint
-    [InlineData("17", 23UL)]                      // positive fixint
-    [InlineData("7f", 127UL)]                     // max positive fixint
-    [InlineData("cc80", 128UL)]                   // uint 8
-    [InlineData("ccff", 255UL)]                   // uint 8
-    [InlineData("cd0100", 256UL)]                 // uint 16
-    [InlineData("cdffff", 65535UL)]               // uint 16
-    [InlineData("ce00010000", 65536UL)]           // uint 32
-    [InlineData("ce000f4240", 1000000UL)]         // uint 32
-    [InlineData("ceffffffff", 4294967295UL)]      // uint 32
-    [InlineData("cf0000000100000000", 4294967296UL)]            // uint 64
-    [InlineData("cfffffffffffffffff", 18446744073709551615UL)]  // uint 64
+    [InlineData("00", 0UL)] // positive fixint
+    [InlineData("01", 1UL)] // positive fixint
+    [InlineData("17", 23UL)] // positive fixint
+    [InlineData("7f", 127UL)] // max positive fixint
+    [InlineData("cc80", 128UL)] // uint 8
+    [InlineData("ccff", 255UL)] // uint 8
+    [InlineData("cd0100", 256UL)] // uint 16
+    [InlineData("cdffff", 65535UL)] // uint 16
+    [InlineData("ce00010000", 65536UL)] // uint 32
+    [InlineData("ce000f4240", 1000000UL)] // uint 32
+    [InlineData("ceffffffff", 4294967295UL)] // uint 32
+    [InlineData("cf0000000100000000", 4294967296UL)] // uint 64
+    [InlineData("cfffffffffffffffff", 18446744073709551615UL)] // uint 64
     public void UnsignedInteger(string hex, ulong expected)
     {
         AssertRoundTrip(hex, expected, U64Proxy.Instance);
@@ -42,16 +41,16 @@ public partial class SpecConformanceTests
     // ── Negative integers (negative fixint + int 8/16/32/64) ──────
 
     [Theory]
-    [InlineData("ff", -1L)]                        // negative fixint
-    [InlineData("e0", -32L)]                       // min negative fixint
-    [InlineData("d0df", -33L)]                     // int 8
-    [InlineData("d080", -128L)]                    // int 8
-    [InlineData("d1ff7f", -129L)]                  // int 16
-    [InlineData("d18000", -32768L)]                // int 16
-    [InlineData("d2ffff7fff", -32769L)]            // int 32
-    [InlineData("d280000000", -2147483648L)]       // int 32
-    [InlineData("d3ffffffff7fffffff", -2147483649L)]            // int 64
-    [InlineData("d38000000000000000", -9223372036854775808L)]   // int 64 (long.MinValue)
+    [InlineData("ff", -1L)] // negative fixint
+    [InlineData("e0", -32L)] // min negative fixint
+    [InlineData("d0df", -33L)] // int 8
+    [InlineData("d080", -128L)] // int 8
+    [InlineData("d1ff7f", -129L)] // int 16
+    [InlineData("d18000", -32768L)] // int 16
+    [InlineData("d2ffff7fff", -32769L)] // int 32
+    [InlineData("d280000000", -2147483648L)] // int 32
+    [InlineData("d3ffffffff7fffffff", -2147483649L)] // int 64
+    [InlineData("d38000000000000000", -9223372036854775808L)] // int 64 (long.MinValue)
     public void NegativeInteger(string hex, long expected)
     {
         AssertRoundTrip(hex, expected, I64Proxy.Instance);
@@ -74,24 +73,28 @@ public partial class SpecConformanceTests
     {
         var bytes = Convert.FromHexString("c0");
         var actual = MsgPackSerializer.Deserialize<string?, IDeserialize<string?>>(
-            bytes, NullableRefProxy.De<string, StringProxy>.Instance);
+            bytes,
+            NullableRefProxy.De<string, StringProxy>.Instance
+        );
         Assert.Null(actual);
 
         var serialized = MsgPackSerializer.Serialize<string?>(
-            null, NullableRefProxy.Ser<string, StringProxy>.Instance);
+            null,
+            NullableRefProxy.Ser<string, StringProxy>.Instance
+        );
         Assert.Equal("C0", Convert.ToHexString(serialized));
     }
 
     // ── Strings (fixstr + str 8/16/32) ────────────────────────────
 
     [Theory]
-    [InlineData("a0", "")]                          // fixstr, length 0
-    [InlineData("a161", "a")]                        // fixstr
-    [InlineData("a3666f6f", "foo")]                  // fixstr
-    [InlineData("a568656c6c6f", "hello")]            // fixstr
-    [InlineData("a2c3bc", "\u00fc")]                 // fixstr, ü (2 UTF-8 bytes)
-    [InlineData("a3e6b0b4", "\u6c34")]               // fixstr, 水 (3 UTF-8 bytes)
-    [InlineData("a4f0908591", "\U00010151")]         // fixstr, 𐅑 (4 UTF-8 bytes)
+    [InlineData("a0", "")] // fixstr, length 0
+    [InlineData("a161", "a")] // fixstr
+    [InlineData("a3666f6f", "foo")] // fixstr
+    [InlineData("a568656c6c6f", "hello")] // fixstr
+    [InlineData("a2c3bc", "\u00fc")] // fixstr, ü (2 UTF-8 bytes)
+    [InlineData("a3e6b0b4", "\u6c34")] // fixstr, 水 (3 UTF-8 bytes)
+    [InlineData("a4f0908591", "\U00010151")] // fixstr, 𐅑 (4 UTF-8 bytes)
     public void TextString(string hex, string expected)
     {
         AssertRoundTrip(hex, expected, StringProxy.Instance);
@@ -187,15 +190,21 @@ public partial class SpecConformanceTests
     [Fact]
     public void Array_Empty()
     {
-        AssertCollectionRoundTrip<int[], ArrayProxy.Ser<int, I32Proxy>,
-            ArrayProxy.De<int, I32Proxy>>("90", Array.Empty<int>());
+        AssertCollectionRoundTrip<
+            int[],
+            ArrayProxy.Ser<int, I32Proxy>,
+            ArrayProxy.De<int, I32Proxy>
+        >("90", Array.Empty<int>());
     }
 
     [Fact]
     public void Array_FixArray()
     {
-        AssertCollectionRoundTrip<int[], ArrayProxy.Ser<int, I32Proxy>,
-            ArrayProxy.De<int, I32Proxy>>("93010203", new[] { 1, 2, 3 });
+        AssertCollectionRoundTrip<
+            int[],
+            ArrayProxy.Ser<int, I32Proxy>,
+            ArrayProxy.De<int, I32Proxy>
+        >("93010203", new[] { 1, 2, 3 });
     }
 
     [Fact]
@@ -204,8 +213,11 @@ public partial class SpecConformanceTests
         // 15 elements is the largest fixarray (format byte 0x90 | length).
         var arr = Enumerable.Range(1, 15).ToArray();
         var expectedHex = "9F" + Convert.ToHexString(arr.Select(i => (byte)i).ToArray());
-        AssertCollectionRoundTrip<int[], ArrayProxy.Ser<int, I32Proxy>,
-            ArrayProxy.De<int, I32Proxy>>(expectedHex, arr);
+        AssertCollectionRoundTrip<
+            int[],
+            ArrayProxy.Ser<int, I32Proxy>,
+            ArrayProxy.De<int, I32Proxy>
+        >(expectedHex, arr);
     }
 
     [Fact]
@@ -214,8 +226,11 @@ public partial class SpecConformanceTests
         // 16 elements spills over into array 16 (format byte 0xdc, 2 length bytes).
         var arr = Enumerable.Range(1, 16).ToArray();
         var expectedHex = "DC0010" + Convert.ToHexString(arr.Select(i => (byte)i).ToArray());
-        AssertCollectionRoundTrip<int[], ArrayProxy.Ser<int, I32Proxy>,
-            ArrayProxy.De<int, I32Proxy>>(expectedHex, arr);
+        AssertCollectionRoundTrip<
+            int[],
+            ArrayProxy.Ser<int, I32Proxy>,
+            ArrayProxy.De<int, I32Proxy>
+        >(expectedHex, arr);
     }
 
     // ── Maps (fixmap + map 16) ────────────────────────────────────
@@ -226,8 +241,8 @@ public partial class SpecConformanceTests
         AssertCollectionRoundTrip<
             Dictionary<int, int>,
             DictProxy.Ser<int, int, I32Proxy, I32Proxy>,
-            DictProxy.De<int, int, I32Proxy, I32Proxy>>(
-            "80", new Dictionary<int, int>());
+            DictProxy.De<int, int, I32Proxy, I32Proxy>
+        >("80", new Dictionary<int, int>());
     }
 
     [Fact]
@@ -238,15 +253,16 @@ public partial class SpecConformanceTests
         var bytes = Convert.FromHexString(hex);
         var actual = MsgPackSerializer.Deserialize<
             Dictionary<int, int>,
-            IDeserialize<Dictionary<int, int>>>(
-            bytes, DictProxy.De<int, int, I32Proxy, I32Proxy>.Instance);
+            IDeserialize<Dictionary<int, int>>
+        >(bytes, DictProxy.De<int, int, I32Proxy, I32Proxy>.Instance);
         Assert.Equal(2, actual.Count);
         Assert.Equal(2, actual[1]);
         Assert.Equal(4, actual[3]);
 
         var serialized = MsgPackSerializer.Serialize(
             new Dictionary<int, int> { [1] = 2, [3] = 4 },
-            DictProxy.Ser<int, int, I32Proxy, I32Proxy>.Instance);
+            DictProxy.Ser<int, int, I32Proxy, I32Proxy>.Instance
+        );
         Assert.Equal(hex, Convert.ToHexString(serialized), StringComparer.OrdinalIgnoreCase);
     }
 
@@ -258,8 +274,8 @@ public partial class SpecConformanceTests
         AssertCollectionRoundTrip<
             Dictionary<string, string>,
             DictProxy.Ser<string, string, StringProxy, StringProxy>,
-            DictProxy.De<string, string, StringProxy, StringProxy>>(
-            hex, new Dictionary<string, string> { ["a"] = "A" });
+            DictProxy.De<string, string, StringProxy, StringProxy>
+        >(hex, new Dictionary<string, string> { ["a"] = "A" });
     }
 
     // ── Custom types (encoded as a map keyed by member name) ──────

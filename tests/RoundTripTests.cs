@@ -1,4 +1,3 @@
-
 using MessagePack;
 
 namespace Serde.MsgPack.Tests;
@@ -111,19 +110,24 @@ public partial class RoundTripTests
         AssertRoundTrip<
             string?,
             NullableRefProxy.Ser<string, StringProxy>,
-            NullableRefProxy.De<string, StringProxy>>(null);
+            NullableRefProxy.De<string, StringProxy>
+        >(null);
     }
 
     [GenerateSerde]
     private enum ByteEnum : byte
     {
-        A, B, C
+        A,
+        B,
+        C,
     }
 
     [GenerateSerde]
     private enum SparseEnum : byte
     {
-        A = 2, B = 3, C = 255
+        A = 2,
+        B = 3,
+        C = 255,
     }
 
     [Fact]
@@ -145,7 +149,9 @@ public partial class RoundTripTests
     [GenerateSerde]
     private enum IntEnum : int
     {
-        A, B, C
+        A,
+        B,
+        C,
     }
 
     [Fact]
@@ -177,6 +183,7 @@ public partial class RoundTripTests
     {
         [Key(1)]
         public int Y { get; init; }
+
         [Key(0)]
         public int X { get; init; }
     }
@@ -185,7 +192,9 @@ public partial class RoundTripTests
     public void TestOutOfOrderKeys()
     {
         // Out of order keys are not supported for Serde
-        Assert.Throws<InvalidOperationException>(() => MsgPackSerializer.Serialize(new OutOfOrderKeys { X = 1, Y = 2 }));
+        Assert.Throws<InvalidOperationException>(() =>
+            MsgPackSerializer.Serialize(new OutOfOrderKeys { X = 1, Y = 2 })
+        );
 
         // Work fine with MessagePack
         var actual = MessagePackSerializer.Serialize(new OutOfOrderKeys { X = 1, Y = 2 });
@@ -241,9 +250,24 @@ public partial class RoundTripTests
         // Exercises the map 16 length path for custom types (>15 fields, format byte 0xde).
         var value = new BigRecord
         {
-            F00 = 0, F01 = 1, F02 = 2, F03 = 3, F04 = 4, F05 = 5,
-            F06 = 6, F07 = 7, F08 = 8, F09 = 9, F10 = 10, F11 = 11,
-            F12 = 12, F13 = 13, F14 = 14, F15 = 15, F16 = 16, F17 = 17,
+            F00 = 0,
+            F01 = 1,
+            F02 = 2,
+            F03 = 3,
+            F04 = 4,
+            F05 = 5,
+            F06 = 6,
+            F07 = 7,
+            F08 = 8,
+            F09 = 9,
+            F10 = 10,
+            F11 = 11,
+            F12 = 12,
+            F13 = 13,
+            F14 = 14,
+            F15 = 15,
+            F16 = 16,
+            F17 = 17,
         };
         AssertRoundTrip(value);
     }
@@ -251,19 +275,21 @@ public partial class RoundTripTests
     [Fact]
     public void TestArray()
     {
-        AssertRoundTrip<
-            int[],
-            ArrayProxy.Ser<int, I32Proxy>,
-            ArrayProxy.De<int, I32Proxy>>(new[] { 1, 2, 3 });
+        AssertRoundTrip<int[], ArrayProxy.Ser<int, I32Proxy>, ArrayProxy.De<int, I32Proxy>>(
+            new[] { 1, 2, 3 }
+        );
         AssertRoundTrip<
             string[],
             ArrayProxy.Ser<string, StringProxy>,
-            ArrayProxy.De<string, StringProxy>>(new[] { "a", "b", "c" });
-        AssertRoundTrip<
-            Point[],
-            ArrayProxy.Ser<Point, Point>,
-            ArrayProxy.De<Point, Point>>(
-                new[] { new Point { X = 1, Y = 2 }, new Point { X = 3, Y = 4 } });
+            ArrayProxy.De<string, StringProxy>
+        >(new[] { "a", "b", "c" });
+        AssertRoundTrip<Point[], ArrayProxy.Ser<Point, Point>, ArrayProxy.De<Point, Point>>(
+            new[]
+            {
+                new Point { X = 1, Y = 2 },
+                new Point { X = 3, Y = 4 },
+            }
+        );
     }
 
     [Fact]
@@ -271,10 +297,7 @@ public partial class RoundTripTests
     {
         // Exercises the array 16 length path (>15 elements, format byte 0xdc)
         var arr = Enumerable.Range(0, 16).ToArray();
-        AssertRoundTrip<
-            int[],
-            ArrayProxy.Ser<int, I32Proxy>,
-            ArrayProxy.De<int, I32Proxy>>(arr);
+        AssertRoundTrip<int[], ArrayProxy.Ser<int, I32Proxy>, ArrayProxy.De<int, I32Proxy>>(arr);
     }
 
     [Fact]
@@ -282,10 +305,7 @@ public partial class RoundTripTests
     {
         // Exercises the array 16 length path with a multi-byte count (format byte 0xdc)
         var arr = Enumerable.Range(0, 300).ToArray();
-        AssertRoundTrip<
-            int[],
-            ArrayProxy.Ser<int, I32Proxy>,
-            ArrayProxy.De<int, I32Proxy>>(arr);
+        AssertRoundTrip<int[], ArrayProxy.Ser<int, I32Proxy>, ArrayProxy.De<int, I32Proxy>>(arr);
     }
 
     [Fact]
@@ -294,18 +314,30 @@ public partial class RoundTripTests
         AssertRoundTrip<
             Dictionary<string, int>,
             DictProxy.Ser<string, int, StringProxy, I32Proxy>,
-            DictProxy.De<string, int, StringProxy, I32Proxy>>(
-                new Dictionary<string, int> { { "a", 1 }, { "b", 2 } });
+            DictProxy.De<string, int, StringProxy, I32Proxy>
+        >(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } });
         AssertRoundTrip<
             Dictionary<int, string>,
             DictProxy.Ser<int, string, I32Proxy, StringProxy>,
-            DictProxy.De<int, string, I32Proxy, StringProxy>>(
-                new Dictionary<int, string> { { 1, "a" }, { 2, "b" } });
+            DictProxy.De<int, string, I32Proxy, StringProxy>
+        >(new Dictionary<int, string> { { 1, "a" }, { 2, "b" } });
         AssertRoundTrip<
             Dictionary<Point, string>,
             DictProxy.Ser<Point, string, Point, StringProxy>,
-            DictProxy.De<Point, string, Point, StringProxy>>(
-                new Dictionary<Point, string> { { new Point { X = 1, Y = 2 }, "a" }, { new Point { X = 3, Y = 4 }, "b" } });
+            DictProxy.De<Point, string, Point, StringProxy>
+        >(
+            new Dictionary<Point, string>
+            {
+                {
+                    new Point { X = 1, Y = 2 },
+                    "a"
+                },
+                {
+                    new Point { X = 3, Y = 4 },
+                    "b"
+                },
+            }
+        );
     }
 
     [Fact]
@@ -357,10 +389,14 @@ public partial class RoundTripTests
     {
         AssertRoundTrip(
             new DateTimeOffset(2024, 6, 7, 1, 2, 3, TimeSpan.FromHours(-7)),
-            DateTimeOffsetProxy.Instance, DateTimeOffsetProxy.Instance);
+            DateTimeOffsetProxy.Instance,
+            DateTimeOffsetProxy.Instance
+        );
         AssertRoundTrip(
             new DateTimeOffset(1999, 12, 31, 23, 59, 59, TimeSpan.Zero),
-            DateTimeOffsetProxy.Instance, DateTimeOffsetProxy.Instance);
+            DateTimeOffsetProxy.Instance,
+            DateTimeOffsetProxy.Instance
+        );
     }
 
     [Fact]
@@ -369,13 +405,19 @@ public partial class RoundTripTests
         // The timestamp extension stores UTC instants only.
         AssertRoundTrip(
             new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Utc),
-            DateTimeProxy.Instance, DateTimeProxy.Instance);
+            DateTimeProxy.Instance,
+            DateTimeProxy.Instance
+        );
         AssertRoundTrip(
             new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Utc).AddTicks(4567),
-            DateTimeProxy.Instance, DateTimeProxy.Instance);
+            DateTimeProxy.Instance,
+            DateTimeProxy.Instance
+        );
         AssertRoundTrip(
             new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-            DateTimeProxy.Instance, DateTimeProxy.Instance);
+            DateTimeProxy.Instance,
+            DateTimeProxy.Instance
+        );
         AssertRoundTrip(DateTime.UnixEpoch, DateTimeProxy.Instance, DateTimeProxy.Instance);
     }
 
@@ -387,10 +429,16 @@ public partial class RoundTripTests
         // silently producing ambiguous/non-portable bytes.
         Assert.Throws<InvalidOperationException>(() =>
             MsgPackSerializer.Serialize(
-                new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Local), DateTimeProxy.Instance));
+                new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Local),
+                DateTimeProxy.Instance
+            )
+        );
         Assert.Throws<InvalidOperationException>(() =>
             MsgPackSerializer.Serialize(
-                new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Unspecified), DateTimeProxy.Instance));
+                new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Unspecified),
+                DateTimeProxy.Instance
+            )
+        );
     }
 
     [GenerateSerde]
@@ -433,7 +481,14 @@ public partial class RoundTripTests
     public void TestSparseCompactRecord()
     {
         // Ordinals 0, 2, 5 leave holes at positions 1, 3, 4 (written as nil).
-        AssertRoundTrip(new SparseCompact { A = 10, B = 20, C = 30 });
+        AssertRoundTrip(
+            new SparseCompact
+            {
+                A = 10,
+                B = 20,
+                C = 30,
+            }
+        );
     }
 
     [GenerateSerde]
@@ -468,7 +523,13 @@ public partial class RoundTripTests
     [Fact]
     public void TestNestedCompactRecord()
     {
-        AssertRoundTrip(new CompactOuter { Inner = new CompactPoint { X = 3, Y = 4 }, Tag = 7 });
+        AssertRoundTrip(
+            new CompactOuter
+            {
+                Inner = new CompactPoint { X = 3, Y = 4 },
+                Tag = 7,
+            }
+        );
     }
 
     [GenerateSerde]
@@ -495,7 +556,11 @@ public partial class RoundTripTests
     private static void AssertRoundTrip<T>(T expected)
         where T : ISerializeProvider<T>, IDeserializeProvider<T>, IEquatable<T>
     {
-        AssertRoundTrip(expected, SerializeProvider.GetSerialize<T, T>(), DeserializeProvider.GetDeserialize<T, T>());
+        AssertRoundTrip(
+            expected,
+            SerializeProvider.GetSerialize<T, T>(),
+            DeserializeProvider.GetDeserialize<T, T>()
+        );
     }
 
     private static void AssertRoundTrip<T, TSerialize>(T expected, TSerialize serializeObject)
@@ -509,11 +574,18 @@ public partial class RoundTripTests
         where TDeserialize : IDeserializeProvider<T>
     {
         var serialized = MsgPackSerializer.Serialize(expected, TSerialize.Instance);
-        var actual = MsgPackSerializer.Deserialize<T, IDeserialize<T>>(serialized, TDeserialize.Instance);
+        var actual = MsgPackSerializer.Deserialize<T, IDeserialize<T>>(
+            serialized,
+            TDeserialize.Instance
+        );
         Assert.Equal(expected, actual);
     }
 
-    private static void AssertRoundTrip<T, TSerialize, TDeserialize>(T expected, TSerialize serialize, TDeserialize deserialize)
+    private static void AssertRoundTrip<T, TSerialize, TDeserialize>(
+        T expected,
+        TSerialize serialize,
+        TDeserialize deserialize
+    )
         where TSerialize : ISerialize<T>
         where TDeserialize : IDeserialize<T>
     {

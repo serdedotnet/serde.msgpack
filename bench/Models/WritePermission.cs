@@ -1,8 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
-
 namespace Benchmark.Models
 {
     [MessagePack.MessagePackObject]
@@ -39,14 +37,13 @@ namespace Benchmark.Models
 
         public bool Equals(WritePermission obj)
         {
-            return
-                this.can_add.TrueEquals(obj.can_add) &&
-                this.can_delete.TrueEquals(obj.can_delete) &&
-                this.can_edit.TrueEquals(obj.can_edit) &&
-                this.max_daily_actions.TrueEquals(obj.max_daily_actions) &&
-                this.min_seconds_between_actions.TrueEquals(obj.min_seconds_between_actions) &&
-                this.object_type.TrueEqualsString(obj.object_type) &&
-                this.user_id.TrueEquals(obj.user_id);
+            return this.can_add.TrueEquals(obj.can_add)
+                && this.can_delete.TrueEquals(obj.can_delete)
+                && this.can_edit.TrueEquals(obj.can_edit)
+                && this.max_daily_actions.TrueEquals(obj.max_daily_actions)
+                && this.min_seconds_between_actions.TrueEquals(obj.min_seconds_between_actions)
+                && this.object_type.TrueEqualsString(obj.object_type)
+                && this.user_id.TrueEquals(obj.user_id);
         }
     }
 }

@@ -1,4 +1,3 @@
-
 using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -29,7 +28,9 @@ internal sealed partial class MsgPackWriter : ISerializer
     {
         if (length is null)
         {
-            throw new InvalidOperationException("Cannot serialize a collection with an unknown length.");
+            throw new InvalidOperationException(
+                "Cannot serialize a collection with an unknown length."
+            );
         }
         if (typeInfo.Kind == InfoKind.List)
         {
@@ -137,6 +138,7 @@ internal sealed partial class MsgPackWriter : ISerializer
             WriteBigEndian(i64);
         }
     }
+
     public void WriteNull()
     {
         _out.Add(0xc0);
@@ -168,8 +170,9 @@ internal sealed partial class MsgPackWriter : ISerializer
         {
             throw new InvalidOperationException(
                 $"Cannot serialize a DateTime with Kind={dt.Kind}; the msgpack timestamp "
-                + "extension only represents UTC instants. Convert the value to UTC "
-                + "(e.g. DateTime.ToUniversalTime() or DateTime.SpecifyKind(value, DateTimeKind.Utc)) first.");
+                    + "extension only represents UTC instants. Convert the value to UTC "
+                    + "(e.g. DateTime.ToUniversalTime() or DateTime.SpecifyKind(value, DateTimeKind.Utc)) first."
+            );
         }
         WriteTimestamp(dt.Ticks);
     }
@@ -220,13 +223,13 @@ internal sealed partial class MsgPackWriter : ISerializer
         {
             <= 0xff => 0xc4,
             <= 0xffff => 0xc5,
-            _ => 0xc6
+            _ => 0xc6,
         };
         var prefixLen = code switch
         {
             0xc4 => 2,
             0xc5 => 3,
-            _ => 5
+            _ => 5,
         };
         var span = _out.GetAppendSpan(prefixLen + bytes.Length);
         _out.Count += prefixLen + bytes.Length;
@@ -248,7 +251,10 @@ internal sealed partial class MsgPackWriter : ISerializer
 
     public void WriteI8(sbyte b) => WriteI64(b);
 
-    private static readonly Encoding _utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+    private static readonly Encoding _utf8 = new UTF8Encoding(
+        encoderShouldEmitUTF8Identifier: false,
+        throwOnInvalidBytes: true
+    );
 
     public void WriteString(string s)
     {
@@ -259,13 +265,19 @@ internal sealed partial class MsgPackWriter : ISerializer
         // we shift the body (Span.CopyTo uses memmove and handles overlap).
         int charLen = s.Length;
         int maxByteCount = _utf8.GetMaxByteCount(charLen);
-        var appendSpan = _out.GetAppendSpan(checked(maxByteCount + 5 /* max length prefix */));
+        var appendSpan = _out.GetAppendSpan(
+            checked(
+                maxByteCount + 5 /* max length prefix */
+            )
+        );
         int guessOffset = Utf8HeaderSize(charLen);
         int byteCount = _utf8.GetBytes(s, appendSpan.Slice(guessOffset, maxByteCount));
         int actualOffset = Utf8HeaderSize(byteCount);
         if (actualOffset != guessOffset)
         {
-            appendSpan.Slice(guessOffset, byteCount).CopyTo(appendSpan.Slice(actualOffset, byteCount));
+            appendSpan
+                .Slice(guessOffset, byteCount)
+                .CopyTo(appendSpan.Slice(actualOffset, byteCount));
         }
         WriteUtf8Header(byteCount, appendSpan);
         _out.Count += actualOffset + byteCount;
@@ -280,13 +292,14 @@ internal sealed partial class MsgPackWriter : ISerializer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Utf8HeaderSize(int length) => length switch
-    {
-        <= 31 => 1,
-        <= 0xff => 2,
-        <= 0xffff => 3,
-        _ => 5
-    };
+    private static int Utf8HeaderSize(int length) =>
+        length switch
+        {
+            <= 31 => 1,
+            <= 0xff => 2,
+            <= 0xffff => 3,
+            _ => 5,
+        };
 
     /// <summary>
     /// Assumes that span is large enough to hold the header.
@@ -412,41 +425,37 @@ internal sealed partial class MsgPackWriter : ISerializer
     private void WriteBigEndian(ushort value)
     {
         var span = _out.GetAppendSpan(2);
-        BinaryPrimitives.WriteUInt16BigEndian(
-            span,
-            value);
+        BinaryPrimitives.WriteUInt16BigEndian(span, value);
         _out.Count += 2;
     }
 
     private void WriteBigEndian(uint value)
     {
         var span = _out.GetAppendSpan(4);
-        BinaryPrimitives.WriteUInt32BigEndian(
-            span,
-            value
-        );
+        BinaryPrimitives.WriteUInt32BigEndian(span, value);
         _out.Count += 4;
     }
 
     private void WriteBigEndian(ulong value)
     {
         var span = _out.GetAppendSpan(8);
-        BinaryPrimitives.WriteUInt64BigEndian(
-            span,
-            value
-        );
+        BinaryPrimitives.WriteUInt64BigEndian(span, value);
         _out.Count += 8;
     }
 
     private void WriteBigEndian(short value) => WriteBigEndian((ushort)value);
+
     private void WriteBigEndian(int value) => WriteBigEndian((uint)value);
+
     private void WriteBigEndian(long value) => WriteBigEndian((ulong)value);
+
     private void WriteBigEndian(float value)
     {
         var span = _out.GetAppendSpan(4);
         BinaryPrimitives.WriteSingleBigEndian(span, value);
         _out.Count += 4;
     }
+
     private void WriteBigEndian(double value)
     {
         var span = _out.GetAppendSpan(8);

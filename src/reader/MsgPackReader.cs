@@ -1,5 +1,3 @@
-
-
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Diagnostics;
@@ -23,8 +21,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         _reader.FillBuffer(1);
     }
 
-    void IDisposable.Dispose()
-    { }
+    void IDisposable.Dispose() { }
 
     // Free lists for the per-type and per-collection deserializer helpers. These are
     // structurally tiny but were previously boxed once per node in the object graph
@@ -149,20 +146,27 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         }
         switch (b)
         {
-            case 0xcc: return EatByteOrThrow();          // uint 8
-            case 0xcd: return ReadBigEndianU16();        // uint 16
-            case 0xce: return ReadBigEndianU32();        // uint 32
-            case 0xcf:                                   // uint 64
+            case 0xcc:
+                return EatByteOrThrow(); // uint 8
+            case 0xcd:
+                return ReadBigEndianU16(); // uint 16
+            case 0xce:
+                return ReadBigEndianU32(); // uint 32
+            case 0xcf: // uint 64
                 var u = ReadBigEndianU64();
                 if (u > long.MaxValue)
                 {
                     throw new Exception($"Integer {u} is too large for a signed 64-bit integer");
                 }
                 return (long)u;
-            case 0xd0: return (sbyte)EatByteOrThrow();   // int 8
-            case 0xd1: return (short)ReadBigEndianU16(); // int 16
-            case 0xd2: return (int)ReadBigEndianU32();   // int 32
-            case 0xd3: return (long)ReadBigEndianU64();  // int 64
+            case 0xd0:
+                return (sbyte)EatByteOrThrow(); // int 8
+            case 0xd1:
+                return (short)ReadBigEndianU16(); // int 16
+            case 0xd2:
+                return (int)ReadBigEndianU32(); // int 32
+            case 0xd3:
+                return (long)ReadBigEndianU64(); // int 64
             default:
                 throw new Exception($"Expected integer, got 0x{b:x}");
         }
@@ -181,14 +185,22 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         }
         switch (b)
         {
-            case 0xcc: return EatByteOrThrow();          // uint 8
-            case 0xcd: return ReadBigEndianU16();        // uint 16
-            case 0xce: return ReadBigEndianU32();        // uint 32
-            case 0xcf: return ReadBigEndianU64();        // uint 64
-            case 0xd0: return ToUnsigned((sbyte)EatByteOrThrow());   // int 8
-            case 0xd1: return ToUnsigned((short)ReadBigEndianU16()); // int 16
-            case 0xd2: return ToUnsigned((int)ReadBigEndianU32());   // int 32
-            case 0xd3: return ToUnsigned((long)ReadBigEndianU64());  // int 64
+            case 0xcc:
+                return EatByteOrThrow(); // uint 8
+            case 0xcd:
+                return ReadBigEndianU16(); // uint 16
+            case 0xce:
+                return ReadBigEndianU32(); // uint 32
+            case 0xcf:
+                return ReadBigEndianU64(); // uint 64
+            case 0xd0:
+                return ToUnsigned((sbyte)EatByteOrThrow()); // int 8
+            case 0xd1:
+                return ToUnsigned((short)ReadBigEndianU16()); // int 16
+            case 0xd2:
+                return ToUnsigned((int)ReadBigEndianU32()); // int 32
+            case 0xd3:
+                return ToUnsigned((long)ReadBigEndianU64()); // int 64
             default:
                 if (b >= 0xe0)
                 {
@@ -316,6 +328,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         _reader.Advance(5);
         return result;
     }
+
     float IDeserializer.ReadF32() => ReadF32();
 
     private short ReadI16()
@@ -408,7 +421,9 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         int index = info.TryGetIndex(span);
         if (index == ITypeDeserializer.IndexNotFound)
         {
-            throw new Exception($"Unknown enum member '{Encoding.UTF8.GetString(span)}' for enum '{info.Name}'");
+            throw new Exception(
+                $"Unknown enum member '{Encoding.UTF8.GetString(span)}' for enum '{info.Name}'"
+            );
         }
         return index;
     }
@@ -463,8 +478,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
                 throw new Exception($"Expected a timestamp extension, got 0x{b:x}");
         }
 
-        return (seconds + BclSecondsAtUnixEpoch) * TimeSpan.TicksPerSecond
-            + nanoseconds / 100;
+        return (seconds + BclSecondsAtUnixEpoch) * TimeSpan.TicksPerSecond + nanoseconds / 100;
     }
 
     private void ExpectTimestampType()
@@ -564,9 +578,10 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
                 {
                     throw new Exception($"Expected array, got 0x{b:x}");
                 }
-                var expected = typeInfo.FieldCount == 0
-                    ? 0
-                    : typeInfo.GetFieldOrdinal(typeInfo.FieldCount - 1) + 1;
+                var expected =
+                    typeInfo.FieldCount == 0
+                        ? 0
+                        : typeInfo.GetFieldOrdinal(typeInfo.FieldCount - 1) + 1;
                 if (length != expected)
                 {
                     throw new Exception($"Expected array of length {expected}, got {length}");
@@ -675,7 +690,9 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         }
         if (length != 2)
         {
-            throw new Exception($"Expected a 2-element array for DateTimeOffset, got length {length}");
+            throw new Exception(
+                $"Expected a 2-element array for DateTimeOffset, got length {length}"
+            );
         }
         long ticks = ReadTimestampTicks();
         short offsetMinutes = (short)ReadInt64Token();

@@ -1,4 +1,3 @@
-
 using Serde;
 
 namespace Serde.MsgPack;
@@ -27,13 +26,23 @@ partial class MsgPackWriter : ITypeSerializer
         // No end, all types are length-prefixed
     }
 
-    void ITypeSerializer.WriteValue<T>(ISerdeInfo typeInfo, int fieldIndex, T value, ISerialize<T> serialize)
+    void ITypeSerializer.WriteValue<T>(
+        ISerdeInfo typeInfo,
+        int fieldIndex,
+        T value,
+        ISerialize<T> serialize
+    )
     {
         WritePropertyName(typeInfo, fieldIndex);
         serialize.Serialize(value, this);
     }
 
-    void ITypeSerializer.WriteEnum(ISerdeInfo typeInfo, int index, ISerdeInfo fieldInfo, int ordinal)
+    void ITypeSerializer.WriteEnum(
+        ISerdeInfo typeInfo,
+        int index,
+        ISerdeInfo fieldInfo,
+        int ordinal
+    )
     {
         WritePropertyName(typeInfo, index);
         WriteEnum(fieldInfo, ordinal);

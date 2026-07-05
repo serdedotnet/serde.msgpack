@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 using System.Collections.Generic;
 
@@ -94,25 +93,24 @@ namespace Benchmark.Models
 
         public bool Equals(SearchExcerpt obj)
         {
-            return
-                this.answer_count.TrueEquals(obj.answer_count) &&
-                this.answer_id.TrueEquals(obj.answer_id) &&
-                this.body.TrueEqualsString(obj.body) &&
-                this.closed_date.TrueEquals(obj.closed_date) &&
-                this.community_owned_date.TrueEquals(obj.community_owned_date) &&
-                this.creation_date.TrueEquals(obj.creation_date) &&
-                this.excerpt.TrueEqualsString(obj.excerpt) &&
-                this.is_accepted.TrueEquals(obj.is_accepted) &&
-                this.is_answered.TrueEquals(obj.is_answered) &&
-                this.item_type.TrueEquals(obj.item_type) &&
-                this.last_activity_date.TrueEquals(obj.last_activity_date) &&
-                this.last_activity_user.TrueEquals(obj.last_activity_user) &&
-                this.locked_date.TrueEquals(obj.locked_date) &&
-                this.owner.TrueEquals(obj.owner) &&
-                this.question_id.TrueEquals(obj.question_id) &&
-                this.score.TrueEquals(obj.score) &&
-                this.tags.TrueEqualsString(obj.tags) &&
-                this.title.TrueEqualsString(obj.title);
+            return this.answer_count.TrueEquals(obj.answer_count)
+                && this.answer_id.TrueEquals(obj.answer_id)
+                && this.body.TrueEqualsString(obj.body)
+                && this.closed_date.TrueEquals(obj.closed_date)
+                && this.community_owned_date.TrueEquals(obj.community_owned_date)
+                && this.creation_date.TrueEquals(obj.creation_date)
+                && this.excerpt.TrueEqualsString(obj.excerpt)
+                && this.is_accepted.TrueEquals(obj.is_accepted)
+                && this.is_answered.TrueEquals(obj.is_answered)
+                && this.item_type.TrueEquals(obj.item_type)
+                && this.last_activity_date.TrueEquals(obj.last_activity_date)
+                && this.last_activity_user.TrueEquals(obj.last_activity_user)
+                && this.locked_date.TrueEquals(obj.locked_date)
+                && this.owner.TrueEquals(obj.owner)
+                && this.question_id.TrueEquals(obj.question_id)
+                && this.score.TrueEquals(obj.score)
+                && this.tags.TrueEqualsString(obj.tags)
+                && this.title.TrueEqualsString(obj.title);
         }
     }
 }

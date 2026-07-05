@@ -1,8 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
-
 namespace Benchmark.Models
 {
     [MessagePack.MessagePackObject]
@@ -23,10 +21,9 @@ namespace Benchmark.Models
 
         public bool Equals(Privilege obj)
         {
-            return
-                this.description.TrueEqualsString(obj.description) &&
-                this.reputation.TrueEquals(obj.reputation) &&
-                this.short_description.TrueEqualsString(obj.short_description);
+            return this.description.TrueEqualsString(obj.description)
+                && this.reputation.TrueEquals(obj.reputation)
+                && this.short_description.TrueEqualsString(obj.short_description);
         }
     }
 }

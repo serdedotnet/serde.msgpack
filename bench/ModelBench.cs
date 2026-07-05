@@ -3,8 +3,8 @@
 // All models use the compact positional-array representation (integer keys /
 // explicit Serde ordinals) on both sides for a fair, like-for-like comparison.
 
-using BenchmarkDotNet.Attributes;
 using Benchmark.Models;
+using BenchmarkDotNet.Attributes;
 using MessagePack;
 using Serde;
 
@@ -115,7 +115,8 @@ namespace Benchmarks
         public T? MessagePack() => MessagePackSerializer.Deserialize<T>(_mpBytes);
 
         [Benchmark]
-        public T SerdeMsgPack() => Serde.MsgPack.MsgPackSerializer.Deserialize<T, IDeserialize<T>>(_serdeBytes, _proxy);
+        public T SerdeMsgPack() =>
+            Serde.MsgPack.MsgPackSerializer.Deserialize<T, IDeserialize<T>>(_serdeBytes, _proxy);
     }
 
     /// <summary>
@@ -170,14 +171,21 @@ namespace Benchmarks
                 value[i] = sample;
             }
             _mpBytes = MessagePackSerializer.Serialize(value);
-            _serdeBytes = Serde.MsgPack.MsgPackSerializer.Serialize(value, ArrayProxy.Ser<User, User>.Instance);
+            _serdeBytes = Serde.MsgPack.MsgPackSerializer.Serialize(
+                value,
+                ArrayProxy.Ser<User, User>.Instance
+            );
         }
 
         [Benchmark]
         public User[]? MessagePack() => MessagePackSerializer.Deserialize<User[]>(_mpBytes);
 
         [Benchmark]
-        public User[] SerdeMsgPack() => Serde.MsgPack.MsgPackSerializer.Deserialize<User[], IDeserialize<User[]>>(_serdeBytes, _proxy);
+        public User[] SerdeMsgPack() =>
+            Serde.MsgPack.MsgPackSerializer.Deserialize<User[], IDeserialize<User[]>>(
+                _serdeBytes,
+                _proxy
+            );
     }
 
     /// <summary>
@@ -186,7 +194,10 @@ namespace Benchmarks
     /// </summary>
     internal static class Providers
     {
-        public static ISerialize<T> Ser<T>() where T : ISerializeProvider<T> => T.Instance;
-        public static IDeserialize<T> Deser<T>() where T : IDeserializeProvider<T> => T.Instance;
+        public static ISerialize<T> Ser<T>()
+            where T : ISerializeProvider<T> => T.Instance;
+
+        public static IDeserialize<T> Deser<T>()
+            where T : IDeserializeProvider<T> => T.Instance;
     }
 }

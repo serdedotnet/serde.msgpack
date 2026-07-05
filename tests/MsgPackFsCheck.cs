@@ -1,4 +1,3 @@
-
 using CsCheck;
 using MessagePack;
 
@@ -18,12 +17,10 @@ public class MsgPackFsCheck
 
     // Strings built from valid Unicode scalar values (no unpaired surrogates),
     // covering the full multi-byte UTF-8 range including astral planes.
-    private static readonly Gen<string> GenString =
-        Gen.Int[0, 0x10FFFF]
-            .Where(cp => cp < 0xD800 || cp > 0xDFFF)
-            .Select(char.ConvertFromUtf32)
-            .Array
-            .Select(parts => string.Concat(parts));
+    private static readonly Gen<string> GenString = Gen.Int[0, 0x10FFFF]
+        .Where(cp => cp < 0xD800 || cp > 0xDFFF)
+        .Select(char.ConvertFromUtf32)
+        .Array.Select(parts => string.Concat(parts));
 
     private static readonly Gen<byte[]> GenBytes = Gen.Byte.Array[0, 600];
 
@@ -117,52 +114,71 @@ public class MsgPackFsCheck
 
     [Fact]
     public void RoundTripIntArray() =>
-        AssertCollectionRoundTrip<int[], ArrayProxy.Ser<int, I32Proxy>, ArrayProxy.De<int, I32Proxy>>(GenIntArray);
+        AssertCollectionRoundTrip<
+            int[],
+            ArrayProxy.Ser<int, I32Proxy>,
+            ArrayProxy.De<int, I32Proxy>
+        >(GenIntArray);
 
     // ── Helpers ───────────────────────────────────────────────────
 
     private static void AssertOracle<T, TProxy>(Gen<T> gen, TProxy proxy)
         where TProxy : ISerialize<T>
     {
-        gen.Sample(value =>
-        {
-            byte[] expected = MessagePackSerializer.Serialize(value);
-            byte[] actual = MsgPackSerializer.Serialize(value, proxy);
-            Assert.Equal(expected, actual);
-        }, iter: Iter);
+        gen.Sample(
+            value =>
+            {
+                byte[] expected = MessagePackSerializer.Serialize(value);
+                byte[] actual = MsgPackSerializer.Serialize(value, proxy);
+                Assert.Equal(expected, actual);
+            },
+            iter: Iter
+        );
     }
 
     private static void AssertCollectionOracle<T, TSer>(Gen<T> gen)
         where TSer : ISerializeProvider<T>
     {
-        gen.Sample(value =>
-        {
-            byte[] expected = MessagePackSerializer.Serialize(value);
-            byte[] actual = MsgPackSerializer.Serialize(value, TSer.Instance);
-            Assert.Equal(expected, actual);
-        }, iter: Iter);
+        gen.Sample(
+            value =>
+            {
+                byte[] expected = MessagePackSerializer.Serialize(value);
+                byte[] actual = MsgPackSerializer.Serialize(value, TSer.Instance);
+                Assert.Equal(expected, actual);
+            },
+            iter: Iter
+        );
     }
 
     private static void AssertRoundTrip<T, TProxy>(Gen<T> gen, TProxy proxy)
         where TProxy : ISerialize<T>, IDeserializeProvider<T>
     {
-        gen.Sample(value =>
-        {
-            byte[] bytes = MsgPackSerializer.Serialize(value, proxy);
-            T actual = MsgPackSerializer.Deserialize<T, IDeserialize<T>>(bytes, TProxy.Instance);
-            Assert.Equal(value, actual);
-        }, iter: Iter);
+        gen.Sample(
+            value =>
+            {
+                byte[] bytes = MsgPackSerializer.Serialize(value, proxy);
+                T actual = MsgPackSerializer.Deserialize<T, IDeserialize<T>>(
+                    bytes,
+                    TProxy.Instance
+                );
+                Assert.Equal(value, actual);
+            },
+            iter: Iter
+        );
     }
 
     private static void AssertCollectionRoundTrip<T, TSer, TDe>(Gen<T> gen)
         where TSer : ISerializeProvider<T>
         where TDe : IDeserializeProvider<T>
     {
-        gen.Sample(value =>
-        {
-            byte[] bytes = MsgPackSerializer.Serialize(value, TSer.Instance);
-            T actual = MsgPackSerializer.Deserialize<T, IDeserialize<T>>(bytes, TDe.Instance);
-            Assert.Equal(value, actual);
-        }, iter: Iter);
+        gen.Sample(
+            value =>
+            {
+                byte[] bytes = MsgPackSerializer.Serialize(value, TSer.Instance);
+                T actual = MsgPackSerializer.Deserialize<T, IDeserialize<T>>(bytes, TDe.Instance);
+                Assert.Equal(value, actual);
+            },
+            iter: Iter
+        );
     }
 }

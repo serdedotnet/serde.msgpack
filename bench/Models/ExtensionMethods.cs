@@ -70,16 +70,23 @@ namespace Benchmark
 
         public static bool IsTypedList(this Type type)
         {
-            return
-                (type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>)) ||
-                type.GetTypeInfo().GetInterfaces().Any(i =>
-                    i.GetTypeInfo().IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+            return (
+                    type.GetTypeInfo().IsGenericType
+                    && type.GetGenericTypeDefinition() == typeof(IList<>)
+                )
+                || type.GetTypeInfo()
+                    .GetInterfaces()
+                    .Any(i =>
+                        i.GetTypeInfo().IsGenericType
+                        && i.GetGenericTypeDefinition() == typeof(IList<>)
+                    );
         }
 
         private class GenericEqualityComparer<T> : IEqualityComparer<T>
             where T : class, IGenericEquality<T>
         {
-            public static readonly GenericEqualityComparer<T> Default = new GenericEqualityComparer<T>();
+            public static readonly GenericEqualityComparer<T> Default =
+                new GenericEqualityComparer<T>();
 
             public bool Equals(T x, T y)
             {

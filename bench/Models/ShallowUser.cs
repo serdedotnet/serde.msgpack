@@ -5,7 +5,6 @@
 #pragma warning disable IDE1006
 #pragma warning disable SA1516
 
-
 namespace Benchmark.Models
 {
     [Serde.GenerateSerde(AsUnderlying = true)]
@@ -55,15 +54,14 @@ namespace Benchmark.Models
 
         public bool Equals(ShallowUser obj)
         {
-            return
-                this.accept_rate.TrueEquals(obj.accept_rate) &&
-                this.badge_counts.TrueEquals(obj.badge_counts) &&
-                this.display_name.TrueEqualsString(obj.display_name) &&
-                this.link.TrueEqualsString(obj.link) &&
-                this.profile_image.TrueEqualsString(obj.profile_image) &&
-                this.reputation.TrueEquals(obj.reputation) &&
-                this.user_id.TrueEquals(obj.user_id) &&
-                this.user_type.TrueEquals(obj.user_type);
+            return this.accept_rate.TrueEquals(obj.accept_rate)
+                && this.badge_counts.TrueEquals(obj.badge_counts)
+                && this.display_name.TrueEqualsString(obj.display_name)
+                && this.link.TrueEqualsString(obj.link)
+                && this.profile_image.TrueEqualsString(obj.profile_image)
+                && this.reputation.TrueEquals(obj.reputation)
+                && this.user_id.TrueEquals(obj.user_id)
+                && this.user_type.TrueEquals(obj.user_type);
         }
     }
 
@@ -74,39 +72,45 @@ namespace Benchmark.Models
         [MessagePack.Key(0)]
         [Serde.SerdeMemberOptions(Ordinal = 0)]
         public int? user_id { get; set; }
+
         [MessagePack.Key(1)]
         [Serde.SerdeMemberOptions(Ordinal = 1)]
         public string display_name { get; set; }
+
         [MessagePack.Key(2)]
         [Serde.SerdeMemberOptions(Ordinal = 2)]
         public int? reputation { get; set; }
+
         [MessagePack.Key(3)]
         [Serde.SerdeMemberOptions(Ordinal = 3)]
         public UserType? user_type { get; set; }
+
         [MessagePack.Key(4)]
         [Serde.SerdeMemberOptions(Ordinal = 4)]
         public string profile_image { get; set; }
+
         [MessagePack.Key(5)]
         [Serde.SerdeMemberOptions(Ordinal = 5)]
         public string link { get; set; }
+
         [MessagePack.Key(6)]
         [Serde.SerdeMemberOptions(Ordinal = 6)]
         public int? accept_rate { get; set; }
+
         [MessagePack.Key(7)]
         [Serde.SerdeMemberOptions(Ordinal = 7)]
         public User.BadgeCount2 badge_counts { get; set; }
 
         public bool Equals(ShallowUser2 obj)
         {
-            return
-                this.accept_rate.TrueEquals(obj.accept_rate) &&
-                this.badge_counts.TrueEquals(obj.badge_counts) &&
-                this.display_name.TrueEqualsString(obj.display_name) &&
-                this.link.TrueEqualsString(obj.link) &&
-                this.profile_image.TrueEqualsString(obj.profile_image) &&
-                this.reputation.TrueEquals(obj.reputation) &&
-                this.user_id.TrueEquals(obj.user_id) &&
-                this.user_type.TrueEquals(obj.user_type);
+            return this.accept_rate.TrueEquals(obj.accept_rate)
+                && this.badge_counts.TrueEquals(obj.badge_counts)
+                && this.display_name.TrueEqualsString(obj.display_name)
+                && this.link.TrueEqualsString(obj.link)
+                && this.profile_image.TrueEqualsString(obj.profile_image)
+                && this.reputation.TrueEquals(obj.reputation)
+                && this.user_id.TrueEquals(obj.user_id)
+                && this.user_type.TrueEquals(obj.user_type);
         }
     }
 }

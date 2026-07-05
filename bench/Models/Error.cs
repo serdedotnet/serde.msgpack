@@ -1,8 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
-
 namespace Benchmark.Models
 {
     [MessagePack.MessagePackObject]
@@ -23,10 +21,9 @@ namespace Benchmark.Models
 
         public bool Equals(Error obj)
         {
-            return
-                this.error_id.TrueEquals(obj.error_id) &&
-                this.error_name.TrueEqualsString(obj.error_name) &&
-                this.description.TrueEqualsString(obj.description);
+            return this.error_id.TrueEquals(obj.error_id)
+                && this.error_name.TrueEqualsString(obj.error_name)
+                && this.description.TrueEqualsString(obj.description);
         }
     }
 }

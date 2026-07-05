@@ -1,4 +1,3 @@
-
 using System;
 using System.Buffers;
 using System.Diagnostics;
@@ -7,6 +6,7 @@ using System.Runtime.CompilerServices;
 internal sealed class ScratchBuffer : IDisposable
 {
     public ScratchBuffer() { }
+
     public ScratchBuffer(int capacity)
     {
         if (capacity < 0)

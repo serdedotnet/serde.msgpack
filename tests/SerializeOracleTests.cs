@@ -72,7 +72,9 @@ public partial class SerializeOracleTests
     [GenerateSerialize]
     private enum ByteEnum : byte
     {
-        A, B, C
+        A,
+        B,
+        C,
     }
 
     [Fact]
@@ -88,7 +90,9 @@ public partial class SerializeOracleTests
     [GenerateSerialize]
     private enum IntEnum : int
     {
-        A, B, C
+        A,
+        B,
+        C,
     }
 
     [Fact]
@@ -104,15 +108,26 @@ public partial class SerializeOracleTests
     [GenerateSerialize(AsUnderlying = true)]
     private enum AsByteEnum : byte
     {
-        A = 1, B = 2, C = 3
+        A = 1,
+        B = 2,
+        C = 3,
     }
 
     [Fact]
     public void TestAsByteEnum()
     {
-        AssertMsgPackEqual(AsByteEnum.A, SerializeProvider.GetSerialize<AsByteEnum, AsByteEnumProxy>());
-        AssertMsgPackEqual(AsByteEnum.B, SerializeProvider.GetSerialize<AsByteEnum, AsByteEnumProxy>());
-        AssertMsgPackEqual(AsByteEnum.C, SerializeProvider.GetSerialize<AsByteEnum, AsByteEnumProxy>());
+        AssertMsgPackEqual(
+            AsByteEnum.A,
+            SerializeProvider.GetSerialize<AsByteEnum, AsByteEnumProxy>()
+        );
+        AssertMsgPackEqual(
+            AsByteEnum.B,
+            SerializeProvider.GetSerialize<AsByteEnum, AsByteEnumProxy>()
+        );
+        AssertMsgPackEqual(
+            AsByteEnum.C,
+            SerializeProvider.GetSerialize<AsByteEnum, AsByteEnumProxy>()
+        );
     }
 
     [GenerateSerialize]
@@ -136,6 +151,7 @@ public partial class SerializeOracleTests
     {
         [Key(1)]
         public int Y { get; init; }
+
         [Key(0)]
         public int X { get; init; }
     }
@@ -144,7 +160,9 @@ public partial class SerializeOracleTests
     public void TestOutOfOrderKeys()
     {
         // Out of order keys are not supported for Serde
-        Assert.Throws<InvalidOperationException>(() => MsgPackSerializer.Serialize(new OutOfOrderKeys { X = 1, Y = 2 }));
+        Assert.Throws<InvalidOperationException>(() =>
+            MsgPackSerializer.Serialize(new OutOfOrderKeys { X = 1, Y = 2 })
+        );
 
         // Work fine with MessagePack
         var actual = MessagePackSerializer.Serialize(new OutOfOrderKeys { X = 1, Y = 2 });
@@ -164,19 +182,41 @@ public partial class SerializeOracleTests
     {
         AssertMsgPackEqual(new[] { 1, 2, 3 }, ArrayProxy.Ser<int, I32Proxy>.Instance);
         AssertMsgPackEqual(new[] { "a", "b", "c" }, ArrayProxy.Ser<string, StringProxy>.Instance);
-        AssertMsgPackEqual(new[] { new Point { X = 1, Y = 2 }, new Point { X = 3, Y = 4 } },
-            ArrayProxy.Ser<Point, Point>.Instance);
+        AssertMsgPackEqual(
+            new[]
+            {
+                new Point { X = 1, Y = 2 },
+                new Point { X = 3, Y = 4 },
+            },
+            ArrayProxy.Ser<Point, Point>.Instance
+        );
     }
 
     [Fact]
     public void TestDictionary()
     {
-        AssertMsgPackEqual(new Dictionary<string, int> { { "a", 1 }, { "b", 2 } },
-            DictProxy.Ser<string, int, StringProxy, I32Proxy>.Instance);
-        AssertMsgPackEqual(new Dictionary<int, string> { { 1, "a" }, { 2, "b" } },
-            DictProxy.Ser<int, string, I32Proxy, StringProxy>.Instance);
-        AssertMsgPackEqual(new Dictionary<Point, string> { { new Point { X = 1, Y = 2 }, "a" }, { new Point { X = 3, Y = 4 }, "b" } },
-            DictProxy.Ser<Point, string, Point, StringProxy>.Instance);
+        AssertMsgPackEqual(
+            new Dictionary<string, int> { { "a", 1 }, { "b", 2 } },
+            DictProxy.Ser<string, int, StringProxy, I32Proxy>.Instance
+        );
+        AssertMsgPackEqual(
+            new Dictionary<int, string> { { 1, "a" }, { 2, "b" } },
+            DictProxy.Ser<int, string, I32Proxy, StringProxy>.Instance
+        );
+        AssertMsgPackEqual(
+            new Dictionary<Point, string>
+            {
+                {
+                    new Point { X = 1, Y = 2 },
+                    "a"
+                },
+                {
+                    new Point { X = 3, Y = 4 },
+                    "b"
+                },
+            },
+            DictProxy.Ser<Point, string, Point, StringProxy>.Instance
+        );
     }
 
     [Fact]
@@ -243,12 +283,29 @@ public partial class SerializeOracleTests
     public void TestRecordWith18Fields()
     {
         // Exercises the map 16 length path for custom types (>15 fields, format byte 0xde).
-        AssertMsgPackEqual(new BigRecord
-        {
-            F00 = 0, F01 = 1, F02 = 2, F03 = 3, F04 = 4, F05 = 5,
-            F06 = 6, F07 = 7, F08 = 8, F09 = 9, F10 = 10, F11 = 11,
-            F12 = 12, F13 = 13, F14 = 14, F15 = 15, F16 = 16, F17 = 17,
-        });
+        AssertMsgPackEqual(
+            new BigRecord
+            {
+                F00 = 0,
+                F01 = 1,
+                F02 = 2,
+                F03 = 3,
+                F04 = 4,
+                F05 = 5,
+                F06 = 6,
+                F07 = 7,
+                F08 = 8,
+                F09 = 9,
+                F10 = 10,
+                F11 = 11,
+                F12 = 12,
+                F13 = 13,
+                F14 = 14,
+                F15 = 15,
+                F16 = 16,
+                F17 = 17,
+            }
+        );
     }
 
     [GenerateSerde]
@@ -293,7 +350,14 @@ public partial class SerializeOracleTests
     public void TestSparseCompactRecord()
     {
         // Holes (positions 1, 3, 4) must be nil-filled exactly as MessagePack does.
-        AssertMsgPackEqual(new SparseCompact { A = 10, B = 20, C = 30 });
+        AssertMsgPackEqual(
+            new SparseCompact
+            {
+                A = 10,
+                B = 20,
+                C = 30,
+            }
+        );
     }
 
     [GenerateSerde]
@@ -319,11 +383,20 @@ public partial class SerializeOracleTests
     public void TestDateTime()
     {
         // timestamp 32 (whole seconds, post-epoch)
-        AssertMsgPackEqual(new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Utc), DateTimeProxy.Instance);
+        AssertMsgPackEqual(
+            new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Utc),
+            DateTimeProxy.Instance
+        );
         // timestamp 64 (sub-second nanoseconds)
-        AssertMsgPackEqual(new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Utc).AddTicks(4567), DateTimeProxy.Instance);
+        AssertMsgPackEqual(
+            new DateTime(2024, 6, 7, 1, 2, 3, DateTimeKind.Utc).AddTicks(4567),
+            DateTimeProxy.Instance
+        );
         // timestamp 96 (pre-1970, negative seconds)
-        AssertMsgPackEqual(new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc), DateTimeProxy.Instance);
+        AssertMsgPackEqual(
+            new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            DateTimeProxy.Instance
+        );
         // epoch
         AssertMsgPackEqual(DateTime.UnixEpoch, DateTimeProxy.Instance);
     }
@@ -333,10 +406,12 @@ public partial class SerializeOracleTests
     {
         AssertMsgPackEqual(
             new DateTimeOffset(2024, 6, 7, 1, 2, 3, TimeSpan.FromHours(-7)),
-            DateTimeOffsetProxy.Instance);
+            DateTimeOffsetProxy.Instance
+        );
         AssertMsgPackEqual(
             new DateTimeOffset(1999, 12, 31, 23, 59, 59, TimeSpan.Zero),
-            DateTimeOffsetProxy.Instance);
+            DateTimeOffsetProxy.Instance
+        );
     }
 
     private void AssertMsgPackEqual<T, U>(T value, U proxy)
@@ -347,8 +422,8 @@ public partial class SerializeOracleTests
         Assert.Equal(expected, actual);
     }
 
-    private void AssertMsgPackEqual<T>(T value) where T : ISerializeProvider<T>
-        => AssertMsgPackEqual(value, T.Instance);
+    private void AssertMsgPackEqual<T>(T value)
+        where T : ISerializeProvider<T> => AssertMsgPackEqual(value, T.Instance);
 
     // Enums are serialized as a msgpack string of the variant name (serde's name-based
     // model), which intentionally differs from MessagePack-CSharp's numeric enum encoding.
@@ -360,5 +435,4 @@ public partial class SerializeOracleTests
         var actual = MsgPackSerializer.Serialize(value, proxy);
         Assert.Equal(expected, actual);
     }
-
 }

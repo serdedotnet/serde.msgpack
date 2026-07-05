@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 using System.Collections.Generic;
 
@@ -85,25 +84,24 @@ namespace Benchmark.Models
 
         public bool Equals(Post obj)
         {
-            return
-                this.body.TrueEqualsString(obj.body) &&
-                this.body_markdown.TrueEqualsString(obj.body_markdown) &&
-                this.comment_count.TrueEquals(obj.comment_count) &&
-                this.comments.TrueEqualsList(obj.comments) &&
-                this.creation_date.TrueEquals(obj.creation_date) &&
-                this.down_vote_count.TrueEquals(obj.down_vote_count) &&
-                this.downvoted.TrueEquals(obj.downvoted) &&
-                this.last_activity_date.TrueEquals(obj.last_activity_date) &&
-                this.last_edit_date.TrueEquals(obj.last_edit_date) &&
-                this.last_editor.TrueEquals(obj.last_editor) &&
-                this.link.TrueEqualsString(obj.link) &&
-                this.owner.TrueEquals(obj.owner) &&
-                this.post_id.TrueEquals(obj.post_id) &&
-                this.post_type.TrueEquals(obj.post_type) &&
-                this.score.TrueEquals(obj.score) &&
-                this.share_link.TrueEqualsString(obj.share_link) &&
-                this.up_vote_count.TrueEquals(obj.up_vote_count) &&
-                this.upvoted.TrueEquals(obj.upvoted);
+            return this.body.TrueEqualsString(obj.body)
+                && this.body_markdown.TrueEqualsString(obj.body_markdown)
+                && this.comment_count.TrueEquals(obj.comment_count)
+                && this.comments.TrueEqualsList(obj.comments)
+                && this.creation_date.TrueEquals(obj.creation_date)
+                && this.down_vote_count.TrueEquals(obj.down_vote_count)
+                && this.downvoted.TrueEquals(obj.downvoted)
+                && this.last_activity_date.TrueEquals(obj.last_activity_date)
+                && this.last_edit_date.TrueEquals(obj.last_edit_date)
+                && this.last_editor.TrueEquals(obj.last_editor)
+                && this.link.TrueEqualsString(obj.link)
+                && this.owner.TrueEquals(obj.owner)
+                && this.post_id.TrueEquals(obj.post_id)
+                && this.post_type.TrueEquals(obj.post_type)
+                && this.score.TrueEquals(obj.score)
+                && this.share_link.TrueEqualsString(obj.share_link)
+                && this.up_vote_count.TrueEquals(obj.up_vote_count)
+                && this.upvoted.TrueEquals(obj.upvoted);
         }
     }
 }

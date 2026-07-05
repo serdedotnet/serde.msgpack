@@ -16,13 +16,16 @@ namespace Benchmarks
         private const int SafetyDepth = 16;
         private static readonly ConcurrentDictionary<Type, object> _cache = new();
 
-        public static object Sample(Type t)
-            => _cache.GetOrAdd(t, static type =>
-            {
-                // Stable seed per type so sizes are reproducible across runs.
-                var rng = new Random(StableSeed(type.FullName!));
-                return Fill(type, rng, 0, new HashSet<Type>())!;
-            });
+        public static object Sample(Type t) =>
+            _cache.GetOrAdd(
+                t,
+                static type =>
+                {
+                    // Stable seed per type so sizes are reproducible across runs.
+                    var rng = new Random(StableSeed(type.FullName!));
+                    return Fill(type, rng, 0, new HashSet<Type>())!;
+                }
+            );
 
         public static T Sample<T>() => (T)Sample(typeof(T));
 
@@ -69,8 +72,15 @@ namespace Benchmarks
             if (t == typeof(char))
                 return (char)('a' + r.Next(26));
             if (t == typeof(DateTime))
-                return new DateTime(2000 + r.Next(20), 1 + r.Next(12), 1 + r.Next(28),
-                    r.Next(24), r.Next(60), r.Next(60), DateTimeKind.Utc);
+                return new DateTime(
+                    2000 + r.Next(20),
+                    1 + r.Next(12),
+                    1 + r.Next(28),
+                    r.Next(24),
+                    r.Next(60),
+                    r.Next(60),
+                    DateTimeKind.Utc
+                );
             if (t == typeof(Guid))
             {
                 var bytes = new byte[16];

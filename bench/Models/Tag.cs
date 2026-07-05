@@ -1,7 +1,6 @@
 ﻿// Copyright (c) All contributors. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using System;
 using System.Collections.Generic;
 
@@ -45,15 +44,14 @@ namespace Benchmark.Models
 
         public bool Equals(Tag obj)
         {
-            return
-                this.count.TrueEquals(obj.count) &&
-                this.has_synonyms.TrueEquals(obj.has_synonyms) &&
-                this.is_moderator_only.TrueEquals(obj.is_moderator_only) &&
-                this.is_required.TrueEquals(obj.is_required) &&
-                this.last_activity_date.TrueEquals(obj.last_activity_date) &&
-                this.name.TrueEqualsString(obj.name) &&
-                this.synonyms.TrueEqualsString(obj.synonyms) &&
-                this.user_id.TrueEquals(obj.user_id);
+            return this.count.TrueEquals(obj.count)
+                && this.has_synonyms.TrueEquals(obj.has_synonyms)
+                && this.is_moderator_only.TrueEquals(obj.is_moderator_only)
+                && this.is_required.TrueEquals(obj.is_required)
+                && this.last_activity_date.TrueEquals(obj.last_activity_date)
+                && this.name.TrueEqualsString(obj.name)
+                && this.synonyms.TrueEqualsString(obj.synonyms)
+                && this.user_id.TrueEquals(obj.user_id);
         }
     }
 }

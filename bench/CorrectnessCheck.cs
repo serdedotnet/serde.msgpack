@@ -15,7 +15,8 @@ namespace Benchmarks
     {
         public static void Run()
         {
-            int identical = 0, diverged = 0;
+            int identical = 0,
+                diverged = 0;
             Check<AccessToken>();
             Check<AccountMerge>();
             Check<Answer>();
@@ -50,7 +51,9 @@ namespace Benchmarks
             Check<UserTimeline>();
             Check<WritePermission>();
             Console.WriteLine();
-            Console.WriteLine($"Round-trip OK for all 33 models (FlagOption excluded: Serde static-init cycle on self-recursive List<FlagOption>). Byte-identical: {identical}, diverged: {diverged}.");
+            Console.WriteLine(
+                $"Round-trip OK for all 33 models (FlagOption excluded: Serde static-init cycle on self-recursive List<FlagOption>). Byte-identical: {identical}, diverged: {diverged}."
+            );
 
             void Check<T>()
                 where T : ISerializeProvider<T>, IDeserializeProvider<T>, IGenericEquality<T>
@@ -60,16 +63,31 @@ namespace Benchmarks
                 var mpBytes = MessagePackSerializer.Serialize(value);
                 var mpBack = MessagePackSerializer.Deserialize<T>(mpBytes);
                 if (!value.Equals(mpBack))
-                    throw new InvalidOperationException($"MessagePack round-trip mismatch for {typeof(T).Name}");
+                    throw new InvalidOperationException(
+                        $"MessagePack round-trip mismatch for {typeof(T).Name}"
+                    );
 
-                var serdeBytes = Serde.MsgPack.MsgPackSerializer.Serialize(value, Providers.Ser<T>());
-                var serdeBack = Serde.MsgPack.MsgPackSerializer.Deserialize<T, IDeserialize<T>>(serdeBytes, Providers.Deser<T>());
+                var serdeBytes = Serde.MsgPack.MsgPackSerializer.Serialize(
+                    value,
+                    Providers.Ser<T>()
+                );
+                var serdeBack = Serde.MsgPack.MsgPackSerializer.Deserialize<T, IDeserialize<T>>(
+                    serdeBytes,
+                    Providers.Deser<T>()
+                );
                 if (!value.Equals(serdeBack))
-                    throw new InvalidOperationException($"Serde round-trip mismatch for {typeof(T).Name}");
+                    throw new InvalidOperationException(
+                        $"Serde round-trip mismatch for {typeof(T).Name}"
+                    );
 
                 bool same = mpBytes.AsSpan().SequenceEqual(serdeBytes);
-                if (same) identical++; else diverged++;
-                Console.WriteLine($"  {typeof(T).Name,-20} mp={mpBytes.Length,5}B serde={serdeBytes.Length,5}B  {(same ? "identical" : "diverged")}");
+                if (same)
+                    identical++;
+                else
+                    diverged++;
+                Console.WriteLine(
+                    $"  {typeof(T).Name, -20} mp={mpBytes.Length, 5}B serde={serdeBytes.Length, 5}B  {(same ? "identical" : "diverged")}"
+                );
             }
         }
     }
