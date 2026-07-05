@@ -1,11 +1,11 @@
-
 using System;
 
 namespace Benchmarks
 {
     internal static class DataGenerator
     {
-        public static T GenerateSerialize<T>() where T : Serde.ISerializeProvider<T>
+        public static T GenerateSerialize<T>()
+            where T : Serde.ISerializeProvider<T>
         {
             if (typeof(T) == typeof(LoginViewModel))
                 return (T)(object)CreateLoginViewModel();
@@ -14,14 +14,14 @@ namespace Benchmarks
 
             throw new InvalidOperationException();
 
-            static LoginViewModel CreateLoginViewModel() => new LoginViewModel
-            {
-                Email = "name.familyname@not.com",
-                // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Dummy credentials for perf testing.")]
-                Password = "abcdefgh123456!@",
-                RememberMe = true
-            };
-
+            static LoginViewModel CreateLoginViewModel() =>
+                new LoginViewModel
+                {
+                    Email = "name.familyname@not.com",
+                    // [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Dummy credentials for perf testing.")]
+                    Password = "abcdefgh123456!@",
+                    RememberMe = true,
+                };
         }
 
         public static byte[] GenerateDeserialize<T>()
@@ -41,6 +41,5 @@ namespace Benchmarks
     "rememberMe": true
 }
 """;
-
     }
 }

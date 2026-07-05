@@ -4,6 +4,12 @@ using BenchmarkDotNet.Running;
 using Benchmarks;
 using MessagePack;
 
+if (args.Length > 0 && args[0] == "check")
+{
+    CorrectnessCheck.Run();
+    return;
+}
+
 var msg1 = MessagePackSerializer.Serialize(Location.Sample);
 var msg2 = Serde.MsgPack.MsgPackSerializer.Serialize(Location.Sample);
 
@@ -20,16 +26,19 @@ var loc2 = Serde.MsgPack.MsgPackSerializer.Deserialize<Location>(msg1);
 Console.WriteLine("Checking correctness of serialization: " + (loc1 == loc2));
 if (loc1 != loc2)
 {
-    throw new InvalidOperationException($"""
+    throw new InvalidOperationException(
+        $"""
 Serialization is not correct
 STJ:
 {loc1}
 
 Serde:
 {loc2}
-""");
+"""
+    );
 }
 
 var config = DefaultConfig.Instance.AddDiagnoser(MemoryDiagnoser.Default);
-var summary = BenchmarkSwitcher.FromAssembly(typeof(DeserializeFromString<>).Assembly)
+var summary = BenchmarkSwitcher
+    .FromAssembly(typeof(DeserializeFromString<>).Assembly)
     .Run(args, config);

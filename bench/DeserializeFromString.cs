@@ -29,6 +29,7 @@ namespace Benchmarks
         }
 
         [Benchmark]
-        public T SerdeMsgPack() => Serde.MsgPack.MsgPackSerializer.Deserialize<T, IDeserialize<T>>(value, _proxy);
+        public T SerdeMsgPack() =>
+            Serde.MsgPack.MsgPackSerializer.Deserialize<T, IDeserialize<T>>(value, _proxy);
     }
 }

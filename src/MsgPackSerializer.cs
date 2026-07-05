@@ -6,8 +6,7 @@ namespace Serde.MsgPack;
 public static class MsgPackSerializer
 {
     public static byte[] Serialize<T>(T value)
-        where T : ISerializeProvider<T>
-        => Serialize(value, T.Instance);
+        where T : ISerializeProvider<T> => Serialize(value, T.Instance);
 
     public static byte[] Serialize<T>(T value, ISerialize<T> proxy)
     {
@@ -24,6 +23,7 @@ public static class MsgPackSerializer
         using var reader = new MsgPackReader<ArrayBufReader>(byteBuffer);
         return proxy.Deserialize(reader);
     }
+
     public static T Deserialize<T>(byte[] bytes)
         where T : IDeserializeProvider<T>
     {

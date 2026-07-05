@@ -1,20 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <!-- Ported StackExchange reference models: suppress nullable-init and comparer nullability warnings. -->
+    <NoWarn>$(NoWarn);CS8618;CS8767</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" />
     <PackageReference Include="MessagePack" />
+    <PackageReference Include="Serde" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\src\Serde.MsgPack.csproj" />
   </ItemGroup>
-
 </Project>
