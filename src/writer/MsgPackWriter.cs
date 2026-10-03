@@ -334,7 +334,14 @@ internal sealed partial class MsgPackWriter : ISerializer
         return offset;
     }
 
-    ITypeSerializer ISerializer.WriteType(ISerdeInfo typeInfo)
+    ITypeSerializer ISerializer.WriteType(ISerdeInfo typeInfo) =>
+        ((ISerializer)this).WriteType(typeInfo, typeInfo.FieldCount);
+
+    // fieldCount is the number of members that will actually be written, which is less than
+    // FieldCount when null members are skipped. A map's header must count exactly the entries
+    // that follow it, so skipped members are left out. A compact array has a position for every
+    // member, so it writes nil for skipped ones instead (see CompactSerializer).
+    ITypeSerializer ISerializer.WriteType(ISerdeInfo typeInfo, int fieldCount)
     {
         switch (typeInfo.Kind)
         {
@@ -344,15 +351,15 @@ internal sealed partial class MsgPackWriter : ISerializer
                     // Compact representation: serialize as a positional array indexed by
                     // ordinal (matching MessagePack-CSharp's integer-key encoding). The
                     // array length is the largest ordinal + 1; holes are filled with nil.
-                    var fieldCount = typeInfo.FieldCount;
-                    int length = fieldCount == 0 ? 0 : typeInfo.GetFieldOrdinal(fieldCount - 1) + 1;
+                    var lastField = typeInfo.FieldCount - 1;
+                    int length = lastField < 0 ? 0 : typeInfo.GetFieldOrdinal(lastField) + 1;
                     WriteArrayLength(length);
                     var ser = _compactSerializer ??= new CompactSerializer(this);
                     ser.Begin(length);
                     return ser;
                 }
                 // Otherwise serialize as a map keyed by field name.
-                WriteMapLength(typeInfo.FieldCount);
+                WriteMapLength(fieldCount);
                 return this;
         }
         throw new InvalidOperationException("Unexpected info kind: " + typeInfo.Kind);

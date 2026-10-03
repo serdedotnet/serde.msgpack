@@ -17,9 +17,11 @@ partial class MsgPackReader<TReader>
 
         private int _count;
 
+        // _length is the number of entries: map entries, or array positions in compact mode.
+        //
         // Compact (positional-array) mode state. When _compact is true, the type
         // was written as an array indexed by field ordinal (see CompactSerializer);
-        // _pos is the current array position and _length the array length.
+        // _pos is the current array position.
         private bool _compact;
         private int _length;
         private int _pos;
@@ -92,8 +94,7 @@ partial class MsgPackReader<TReader>
             IDeserializer deserializer
         ) { }
 
-        void ITypeDeserializer.SkipValue(ISerdeInfo info, int index) =>
-            throw new NotImplementedException();
+        void ITypeDeserializer.SkipValue(ISerdeInfo info, int index) => deserializer.SkipValue();
 
         int ITypeDeserializer.TryReadIndex(ISerdeInfo map) => ReadIndexWithName(map).Item1;
 
@@ -121,7 +122,9 @@ partial class MsgPackReader<TReader>
                     }
                     return (ITypeDeserializer.EndOfType, null);
                 }
-                if (_count >= map.FieldCount)
+                // _length is the number of entries in the map, which can differ from the
+                // type's members when members are unknown or omitted
+                if (_count >= _length)
                 {
                     return (ITypeDeserializer.EndOfType, null);
                 }
