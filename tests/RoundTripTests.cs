@@ -593,4 +593,29 @@ public partial class RoundTripTests
         var actual = MsgPackSerializer.Deserialize<T, IDeserialize<T>>(serialized, deserialize);
         Assert.Equal(expected, actual);
     }
+
+    // The reader requires a map to have exactly as many entries as the type has members, so the
+    // unknown member replaces a known one rather than being added
+    [GenerateSerde]
+    public partial record Renamed
+    {
+        public int Extra { get; init; }
+    }
+
+    [GenerateSerde]
+    [SerdeTypeOptions(DenyUnknownMembers = true)]
+    public partial record Narrow
+    {
+        public int A { get; init; }
+    }
+
+    [Fact]
+    public void UnknownMemberErrorReportsName()
+    {
+        var bytes = MsgPackSerializer.Serialize(new Renamed { Extra = 1 });
+        var ex = Assert.Throws<DeserializeException>(() =>
+            MsgPackSerializer.Deserialize<Narrow>(bytes)
+        );
+        Assert.Contains("'extra'", ex.Message);
+    }
 }
