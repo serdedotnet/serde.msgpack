@@ -116,4 +116,20 @@ public partial class UnknownMemberTests
         var bytes = MsgPackSerializer.Serialize(s_wide);
         Assert.Throws<DeserializeException>(() => MsgPackSerializer.Deserialize<DenyNarrow>(bytes));
     }
+
+    [Fact]
+    public void WrongShapeThrowsDeserializeException()
+    {
+        var bytes = MsgPackSerializer.Serialize("not a map", StringProxy.Instance);
+        Assert.Throws<DeserializeException>(() => MsgPackSerializer.Deserialize<Narrow>(bytes));
+    }
+
+    [Fact]
+    public void TruncatedInputThrowsDeserializeException()
+    {
+        var bytes = MsgPackSerializer.Serialize(new Narrow { A = 1 });
+        Assert.Throws<DeserializeException>(() =>
+            MsgPackSerializer.Deserialize<Narrow>(bytes[..^1])
+        );
+    }
 }

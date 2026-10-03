@@ -82,7 +82,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
     [DoesNotReturn]
     private static void ThrowEof()
     {
-        throw new Exception("Unexpected end of stream");
+        throw new DeserializeException("Unexpected end of stream");
     }
 
     bool IDeserializer.ReadBool() => ReadBool();
@@ -98,7 +98,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         {
             return true;
         }
-        throw new Exception($"Expected boolean, got 0x{b:x}");
+        throw new DeserializeException($"Expected boolean, got 0x{b:x}");
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -156,7 +156,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
                 var u = ReadBigEndianU64();
                 if (u > long.MaxValue)
                 {
-                    throw new Exception($"Integer {u} is too large for a signed 64-bit integer");
+                    throw new DeserializeException($"Integer {u} is too large for a signed 64-bit integer");
                 }
                 return (long)u;
             case 0xd0:
@@ -168,7 +168,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
             case 0xd3:
                 return (long)ReadBigEndianU64(); // int 64
             default:
-                throw new Exception($"Expected integer, got 0x{b:x}");
+                throw new DeserializeException($"Expected integer, got 0x{b:x}");
         }
     }
 
@@ -204,16 +204,16 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
             default:
                 if (b >= 0xe0)
                 {
-                    throw new Exception($"Cannot read negative integer {(sbyte)b} as unsigned");
+                    throw new DeserializeException($"Cannot read negative integer {(sbyte)b} as unsigned");
                 }
-                throw new Exception($"Expected integer, got 0x{b:x}");
+                throw new DeserializeException($"Expected integer, got 0x{b:x}");
         }
 
         static ulong ToUnsigned(long value)
         {
             if (value < 0)
             {
-                throw new Exception($"Cannot read negative integer {value} as unsigned");
+                throw new DeserializeException($"Cannot read negative integer {value} as unsigned");
             }
             return (ulong)value;
         }
@@ -226,7 +226,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var v = ReadUInt64Token();
         if (v > byte.MaxValue)
         {
-            throw new Exception($"Integer {v} is out of range for a byte");
+            throw new DeserializeException($"Integer {v} is out of range for a byte");
         }
         return (byte)v;
     }
@@ -257,7 +257,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
             }
             else
             {
-                throw new Exception($"Expected array, got 0x{b:x}");
+                throw new DeserializeException($"Expected array, got 0x{b:x}");
             }
             return RentCollection(false, length);
         }
@@ -278,13 +278,13 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
             }
             else
             {
-                throw new Exception($"Expected dictionary, got 0x{b:x}");
+                throw new DeserializeException($"Expected dictionary, got 0x{b:x}");
             }
             return RentCollection(true, length * 2);
         }
         else
         {
-            throw new Exception("Expected either List or Dictionary, found " + typeInfo.Kind);
+            throw new ArgumentException("Expected either List or Dictionary, found " + typeInfo.Kind);
         }
     }
 
@@ -303,7 +303,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var b = span[0];
         if (b != 0xcb)
         {
-            throw new Exception($"Expected 64-bit double, got 0x{b:x}");
+            throw new DeserializeException($"Expected 64-bit double, got 0x{b:x}");
         }
         var result = BinaryPrimitives.ReadDoubleBigEndian(span[1..]);
         _reader.Advance(9);
@@ -322,7 +322,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var b = span[0];
         if (b != 0xca)
         {
-            throw new Exception($"Expected 32-bit float, got 0x{b:x}");
+            throw new DeserializeException($"Expected 32-bit float, got 0x{b:x}");
         }
         var result = BinaryPrimitives.ReadSingleBigEndian(span[1..]);
         _reader.Advance(5);
@@ -336,7 +336,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var v = ReadInt64Token();
         if (v < short.MinValue || v > short.MaxValue)
         {
-            throw new Exception($"Integer {v} is out of range for a 16-bit integer");
+            throw new DeserializeException($"Integer {v} is out of range for a 16-bit integer");
         }
         return (short)v;
     }
@@ -348,7 +348,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var v = ReadInt64Token();
         if (v < int.MinValue || v > int.MaxValue)
         {
-            throw new Exception($"Integer {v} is out of range for a 32-bit integer");
+            throw new DeserializeException($"Integer {v} is out of range for a 32-bit integer");
         }
         return (int)v;
     }
@@ -389,7 +389,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var b = EatByteOrThrow();
         if (b != 0xc0)
         {
-            throw new Exception($"Expected nil (0xc0) for compact array hole, got 0x{b:x}");
+            throw new DeserializeException($"Expected nil (0xc0) for compact array hole, got 0x{b:x}");
         }
     }
 
@@ -498,7 +498,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var v = ReadInt64Token();
         if (v < sbyte.MinValue || v > sbyte.MaxValue)
         {
-            throw new Exception($"Integer {v} is out of range for a signed byte");
+            throw new DeserializeException($"Integer {v} is out of range for a signed byte");
         }
         return (sbyte)v;
     }
@@ -521,7 +521,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         int index = info.TryGetIndex(span);
         if (index == ITypeDeserializer.IndexNotFound)
         {
-            throw new Exception(
+            throw new DeserializeException(
                 $"Unknown enum member '{Encoding.UTF8.GetString(span)}' for enum '{info.Name}'"
             );
         }
@@ -567,7 +567,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
                 var len = EatByteOrThrow();
                 if (len != 12)
                 {
-                    throw new Exception($"Expected timestamp 96 (length 12), got length {len}");
+                    throw new DeserializeException($"Expected timestamp 96 (length 12), got length {len}");
                 }
                 ExpectTimestampType();
                 nanoseconds = ReadBigEndianU32();
@@ -575,7 +575,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
                 break;
             }
             default:
-                throw new Exception($"Expected a timestamp extension, got 0x{b:x}");
+                throw new DeserializeException($"Expected a timestamp extension, got 0x{b:x}");
         }
 
         return (seconds + BclSecondsAtUnixEpoch) * TimeSpan.TicksPerSecond + nanoseconds / 100;
@@ -586,7 +586,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var type = EatByteOrThrow();
         if (type != 0xff)
         {
-            throw new Exception($"Expected timestamp extension type -1 (0xff), got 0x{type:x}");
+            throw new DeserializeException($"Expected timestamp extension type -1 (0xff), got 0x{type:x}");
         }
     }
 
@@ -636,7 +636,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         }
         else
         {
-            throw new Exception($"Expected string, got 0x{b:x}");
+            throw new DeserializeException($"Expected string, got 0x{b:x}");
         }
         var span = _reader.Span;
         if (span.Length < length)
@@ -676,7 +676,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
                 }
                 else
                 {
-                    throw new Exception($"Expected array, got 0x{b:x}");
+                    throw new DeserializeException($"Expected array, got 0x{b:x}");
                 }
                 var expected =
                     typeInfo.FieldCount == 0
@@ -684,7 +684,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
                         : typeInfo.GetFieldOrdinal(typeInfo.FieldCount - 1) + 1;
                 if (length != expected)
                 {
-                    throw new Exception($"Expected array of length {expected}, got {length}");
+                    throw new DeserializeException($"Expected array of length {expected}, got {length}");
                 }
                 return RentType(true, length);
             }
@@ -710,11 +710,11 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
             }
             else
             {
-                throw new Exception($"Expected map, got 0x{mb:x}");
+                throw new DeserializeException($"Expected map, got 0x{mb:x}");
             }
             return RentType(false, mlength);
         }
-        throw new Exception("Expected custom type or enum");
+        throw new ArgumentException("Expected custom type or enum, found " + typeInfo.Kind);
     }
 
     private ushort ReadU16()
@@ -722,7 +722,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var v = ReadUInt64Token();
         if (v > ushort.MaxValue)
         {
-            throw new Exception($"Integer {v} is out of range for a 16-bit unsigned integer");
+            throw new DeserializeException($"Integer {v} is out of range for a 16-bit unsigned integer");
         }
         return (ushort)v;
     }
@@ -734,7 +734,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var v = ReadUInt64Token();
         if (v > uint.MaxValue)
         {
-            throw new Exception($"Integer {v} is out of range for a 32-bit unsigned integer");
+            throw new DeserializeException($"Integer {v} is out of range for a 32-bit unsigned integer");
         }
         return (uint)v;
     }
@@ -748,7 +748,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var span = ReadBinSpan();
         if (span.Length != 16)
         {
-            throw new Exception($"Expected 16-byte integer, got {span.Length} bytes");
+            throw new DeserializeException($"Expected 16-byte integer, got {span.Length} bytes");
         }
         return BinaryPrimitives.ReadUInt128BigEndian(span);
     }
@@ -760,7 +760,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         var span = ReadBinSpan();
         if (span.Length != 16)
         {
-            throw new Exception($"Expected 16-byte integer, got {span.Length} bytes");
+            throw new DeserializeException($"Expected 16-byte integer, got {span.Length} bytes");
         }
         return BinaryPrimitives.ReadInt128BigEndian(span);
     }
@@ -783,11 +783,11 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         }
         else
         {
-            throw new Exception($"Expected a 2-element array for DateTimeOffset, got 0x{b:x}");
+            throw new DeserializeException($"Expected a 2-element array for DateTimeOffset, got 0x{b:x}");
         }
         if (length != 2)
         {
-            throw new Exception(
+            throw new DeserializeException(
                 $"Expected a 2-element array for DateTimeOffset, got length {length}"
             );
         }
@@ -804,7 +804,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
             0xc4 => EatByteOrThrow(),
             0xc5 => ReadBigEndianU16(),
             0xc6 => checked((int)ReadBigEndianU32()),
-            _ => throw new Exception($"Expected bin, got 0x{b:x}"),
+            _ => throw new DeserializeException($"Expected bin, got 0x{b:x}"),
         };
         var span = _reader.Span;
         if (span.Length < length)
