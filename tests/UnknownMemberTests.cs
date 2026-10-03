@@ -10,10 +10,11 @@ public partial class UnknownMemberTests
     }
 
     [Fact]
-    public void NullMemberRoundTrip()
+    public void NullMemberIsOmitted()
     {
         var value = new WithNull { Name = null, Value = 7 };
         var bytes = MsgPackSerializer.Serialize(value);
+        Assert.Equal(0x81, bytes[0]); // a map with one entry
         Assert.Equal(value, MsgPackSerializer.Deserialize<WithNull>(bytes));
     }
 
