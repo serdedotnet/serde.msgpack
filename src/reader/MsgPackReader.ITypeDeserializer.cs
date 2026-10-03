@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Text;
 
 namespace Serde.MsgPack;
 
@@ -127,7 +128,8 @@ partial class MsgPackReader<TReader>
                 // custom types are serialized like maps with field names as keys
                 var span = deserializer.ReadUtf8Span();
                 int index = map.TryGetIndex(span);
-                var errorName = index == ITypeDeserializer.IndexNotFound ? span.ToString() : null;
+                var errorName =
+                    index == ITypeDeserializer.IndexNotFound ? Encoding.UTF8.GetString(span) : null;
                 _count++;
                 return (index, errorName);
             }
