@@ -393,6 +393,106 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
         }
     }
 
+    /// <summary>
+    /// Skips one complete value of any type, including the contents of arrays and maps.
+    /// </summary>
+    private void SkipValue()
+    {
+        var b = EatByteOrThrow();
+        switch (b)
+        {
+            case <= 0x7f: // positive fixint
+            case >= 0xe0: // negative fixint
+            case 0xc0 or 0xc2 or 0xc3: // nil, false, true
+                return;
+            case <= 0x8f: // fixmap
+                SkipValues(2 * (b & 0x0f));
+                return;
+            case <= 0x9f: // fixarray
+                SkipValues(b & 0x0f);
+                return;
+            case <= 0xbf: // fixstr
+                SkipBytes(b & 0x1f);
+                return;
+            case 0xc4 or 0xd9: // bin 8, str 8
+                SkipBytes(EatByteOrThrow());
+                return;
+            case 0xc5 or 0xda: // bin 16, str 16
+                SkipBytes(ReadBigEndianU16());
+                return;
+            case 0xc6 or 0xdb: // bin 32, str 32
+                SkipBytes((int)ReadBigEndianU32());
+                return;
+            case 0xc7: // ext 8: length, then the type and the data
+                SkipBytes(EatByteOrThrow() + 1);
+                return;
+            case 0xc8: // ext 16
+                SkipBytes(ReadBigEndianU16() + 1);
+                return;
+            case 0xc9: // ext 32
+                SkipBytes((int)ReadBigEndianU32() + 1);
+                return;
+            case 0xcc or 0xd0: // uint 8, int 8
+                SkipBytes(1);
+                return;
+            case 0xcd or 0xd1: // uint 16, int 16
+                SkipBytes(2);
+                return;
+            case 0xca or 0xce or 0xd2: // float 32, uint 32, int 32
+                SkipBytes(4);
+                return;
+            case 0xcb or 0xcf or 0xd3: // float 64, uint 64, int 64
+                SkipBytes(8);
+                return;
+            case 0xd4: // fixext 1: the type and the data
+                SkipBytes(2);
+                return;
+            case 0xd5: // fixext 2
+                SkipBytes(3);
+                return;
+            case 0xd6: // fixext 4
+                SkipBytes(5);
+                return;
+            case 0xd7: // fixext 8
+                SkipBytes(9);
+                return;
+            case 0xd8: // fixext 16
+                SkipBytes(17);
+                return;
+            case 0xdc: // array 16
+                SkipValues(ReadBigEndianU16());
+                return;
+            case 0xdd: // array 32
+                SkipValues((int)ReadBigEndianU32());
+                return;
+            case 0xde: // map 16
+                SkipValues(2 * ReadBigEndianU16());
+                return;
+            case 0xdf: // map 32
+                SkipValues(2 * (int)ReadBigEndianU32());
+                return;
+            default: // 0xc1 is never used
+                throw new DeserializeException($"Invalid MessagePack format byte 0x{b:x}");
+        }
+    }
+
+    private void SkipValues(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            SkipValue();
+        }
+    }
+
+    private void SkipBytes(int count)
+    {
+        if (_reader.Span.Length < count)
+        {
+            RefillNoEof(count);
+        }
+        _reader.Advance(count);
+    }
+
     public sbyte ReadI8()
     {
         var v = ReadInt64Token();
@@ -590,9 +690,10 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
             }
 
             // Custom types are serialized as maps (see WriteMapLength), with the
-            // field names as keys. Validate the map header here; the keys/values
-            // are read by DeserializeType.ReadIndexWithName.
-            var fieldCount = typeInfo.FieldCount;
+            // field names as keys. The keys/values are read by
+            // DeserializeType.ReadIndexWithName, which reads as many entries as the map
+            // has: more than the type's members means unknown members, and fewer means
+            // omitted ones. Both are handled by the type's deserializer.
             var mb = EatByteOrThrow();
             int mlength;
             if (mb >= 0x80 && mb <= 0x8f)
@@ -611,11 +712,7 @@ internal sealed partial class MsgPackReader<TReader> : IDeserializer
             {
                 throw new Exception($"Expected map, got 0x{mb:x}");
             }
-            if (mlength != fieldCount)
-            {
-                throw new Exception($"Expected map of length {fieldCount}, got {mlength}");
-            }
-            return RentType(false, 0);
+            return RentType(false, mlength);
         }
         throw new Exception("Expected custom type or enum");
     }
