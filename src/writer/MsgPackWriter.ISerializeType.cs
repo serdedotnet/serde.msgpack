@@ -150,6 +150,14 @@ partial class MsgPackWriter : ITypeSerializer
         WriteNull();
     }
 
+    // A null member that would otherwise be skipped is written as nil, because the map's header
+    // already counts every member of the type (see WriteType).
+    void ITypeSerializer.SkipValue(ISerdeInfo typeInfo, int index)
+    {
+        WritePropertyName(typeInfo, index);
+        WriteNull();
+    }
+
     void ITypeSerializer.WriteDateTimeOffset(ISerdeInfo typeInfo, int index, DateTimeOffset dt)
     {
         WritePropertyName(typeInfo, index);
